@@ -212,9 +212,102 @@ build_terms("Men's Slim Fit T-Shirt")
 
 ---
 
-## Parts 2–4
+## Part 2: Indexing and Evaluation
 
-To be added in the corresponding deliveries (indexing and evaluation, ranking and filtering, RAG + user interface + web analytics).
+Everything for Part 2 is in **`IRWA_Part2_Indexing_Evaluation.ipynb`**, which imports the Python modules in `src/`
+(they will be reused in Parts 3 and 4).
+
+### Files
+
+```
+├── IRWA_Part2_Indexing_Evaluation.ipynb    # Part 2: indexing, search, ranking and evaluation
+├── requirements.txt                        # Python libraries
+├── test_queries_results.csv                # output: top 20 results of the 5 test queries (labels filled by hand)
+└── src/
+    ├── preprocessing.py                    # build_terms (copied from Part 1, same behaviour)
+    ├── indexing.py                         # corpus loading, inverted index, idf, AND search
+    ├── ranking.py                          # TF-IDF + cosine ranking
+    └── evaluation.py                       # evaluation metrics
+```
+
+### How to run
+
+1. Install the libraries from the repository root:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Make sure `processed_corpus.json` (output of Part 1, included in the repository) and `validation_labels.csv` are in the repository root.
+3. Start Jupyter **from the repository root** (so that `from src...` imports work) and run all cells in order:
+   ```bash
+   jupyter notebook IRWA_Part2_Indexing_Evaluation.ipynb
+   ```
+   Building the index takes about one second; the whole notebook runs in a few seconds.
+4. **Test queries:** write the 5 chosen queries in `TEST_QUERIES` (section 3.3) and run the cell. It saves
+   `test_queries_results.csv` (`query_id, query, rank, pid, title, label`) with an empty `label` column. Fill it with
+   1 (relevant) / 0 (not relevant) and run section 3.4 to get the metrics. An existing CSV is never overwritten, so the labels are not lost.
+
+### What the notebook does
+
+| Section | Content |
+|---------|---------|
+| 1.1 Load the corpus | Loads `processed_corpus.json` (JSON Lines). The searchable field is `all_terms`. |
+| 1.2 Query preprocessing | Queries are processed with the same `build_terms` of Part 1. |
+| 1.3 Inverted index | Builds `term -> {pid: tf}`, the idf of every term (`log(N / df)`) and the norm of the tf-idf vector of every document. |
+| 1.4 Conjunctive search | AND search: only documents that contain **all** the query terms are returned. |
+| 1.5 TF-IDF ranking | Results ranked by cosine similarity between the tf-idf vectors of the query and the document. |
+| 2.1–2.2 Metrics | Definition of the metrics and a small hand-made example that checks every metric. |
+| 2.3 Validation queries | Metrics at K = 5, 10, 20 of the two queries of `validation_labels.csv`, in the order of the file. |
+| 2.4 Extra | Same metrics after re-ranking the labelled documents with our TF-IDF score. |
+| 3.1–3.2 Test query candidates | Term popularity (document frequency, frequent term combinations in titles) and candidate queries with their number of AND results. |
+| 3.3–3.4 Test queries | Top 20 results saved to `test_queries_results.csv` and evaluation once the labels are filled. |
+
+### Configuration options
+
+| Option | Cell / section | Default | Effect |
+|--------|----------------|---------|--------|
+| `DATA_DIR` | 0. Setup | `"./"` | Folder of the input files and of `test_queries_results.csv` |
+| `CORPUS_PATH`, `VALIDATION_PATH`, `TEST_RESULTS_PATH` | 0. Setup | `DATA_DIR + <file name>` | Paths of the corpus, validation labels and test results |
+| `field` of `build_index` | 1.3 | `"all_terms"` | Field of the corpus that is indexed |
+| `K_VALUES` | 2.3 | `[5, 10, 20]` | Cut-offs used in the evaluation tables |
+| `CANDIDATES` | 3.2 | 15 queries | Candidate test queries |
+| `TEST_QUERIES`, `TOP_K` | 3.3 | empty, `20` | Chosen test queries and number of results saved per query |
+
+### Main functions
+
+| Function | Module | Description |
+|----------|--------|-------------|
+| `build_terms(text)` | `src/preprocessing.py` | Pre-processing pipeline of Part 1; returns the list of terms of a text (used for queries) |
+| `load_corpus(path)` | `src/indexing.py` | Loads `processed_corpus.json` into a DataFrame |
+| `build_index(corpus, field)` | `src/indexing.py` | Inverted index `term -> {pid: tf}` |
+| `compute_idf(index, n_docs)` | `src/indexing.py` | idf of every term |
+| `compute_doc_norms(index, idf)` | `src/indexing.py` | Norm of the tf-idf vector of every document |
+| `conjunctive_search(query, index)` | `src/indexing.py` | Set of pids that contain all the query terms |
+| `rank_tfidf(query, pids, index, idf, doc_norms)` | `src/ranking.py` | Ranks the given pids by tf-idf cosine similarity; returns `[(pid, score)]` |
+| `search(query, index, idf, doc_norms, top_k)` | `src/ranking.py` | AND search + TF-IDF ranking |
+| `precision_at_k`, `recall_at_k`, `avg_precision_at_k`, `f1_at_k`, `ndcg_at_k` | `src/evaluation.py` | Per-query metrics; input is the list of 0/1 labels in ranked order |
+| `reciprocal_rank`, `mean_reciprocal_rank`, `mean_avg_precision` | `src/evaluation.py` | RR, MRR and MAP |
+| `evaluate_rankings(rankings, k, n_relevants)` | `src/evaluation.py` | Table with all the metrics per query and their mean (MAP / MRR) |
+| `evaluate_labelled_csv(path, k)` | `src/evaluation.py` | Evaluates a hand-labelled results CSV (`query_id, rank, label`) |
+
+Example of use (from the repository root):
+
+```python
+from src.indexing import load_corpus, build_index, compute_idf, compute_doc_norms
+from src.ranking import search
+
+corpus = load_corpus("processed_corpus.json")
+index = build_index(corpus)
+idf = compute_idf(index, len(corpus))
+doc_norms = compute_doc_norms(index, idf)
+search("men slim jeans blue", index, idf, doc_norms, top_k=5)
+# list of (pid, score), highest score first: first result JEAFRAQXEKGUPNUN (score 0.558)
+```
+
+---
+
+## Parts 3–4
+
+To be added in the corresponding deliveries (ranking and filtering, RAG + user interface + web analytics).
 
 ## AI usage
 
