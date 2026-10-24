@@ -1,0 +1,11 @@
+# Part 1 and Part 2
+nltk>=3.10.3
+pandas>=2.3.3
+numpy>=2.0.2
+jupyter>=1.1.1
+
+# Part 1 only (plots, word clouds and NER)
+matplotlib>=3.9.4
+seaborn>=0.13.2
+wordcloud>=1.9.6
+spacy>=3.8.16
