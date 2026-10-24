@@ -89,7 +89,7 @@ def evaluate_rankings(rankings, k, n_relevants=None):
 
 def evaluate_labelled_csv(path, k=20):
     """Reads a results CSV (query_id, rank, label) filled by hand and evaluates it."""
-    df = pd.read_csv(path).sort_values(["query_id", "rank"])
+    df = pd.read_csv(path, encoding="utf-8-sig").sort_values(["query_id", "rank"])
     if df["label"].isna().any():
         raise ValueError("There are empty labels in the CSV, fill them first.")
     rankings = {qid: g["label"].astype(int).tolist() for qid, g in df.groupby("query_id")}
