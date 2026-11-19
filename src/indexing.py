@@ -36,6 +36,17 @@ def compute_doc_norms(index, idf):
     return {pid: math.sqrt(value) for pid, value in norms.items()}
 
 
+def compute_doc_lengths(corpus, field="all_terms"):
+    """Number of terms of every document (used for the BM25 length normalisation)."""
+    return {pid: len(terms) for pid, terms in zip(corpus["pid"], corpus[field])}
+
+
+def compute_bm25_idf(index, n_docs):
+    """BM25 idf of every term: log((N - df + 0.5) / (df + 0.5) + 1), always positive."""
+    return {term: math.log((n_docs - len(postings) + 0.5) / (len(postings) + 0.5) + 1)
+            for term, postings in index.items()}
+
+
 def conjunctive_search(query, index):
     """AND search: returns the set of pids that contain all the query terms."""
     terms = set(build_terms(query))
