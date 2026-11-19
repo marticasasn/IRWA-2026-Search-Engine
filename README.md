@@ -11,7 +11,7 @@ e-commerce fashion products dataset (Flipkart), implementing different indexing 
 | Part | Topic | Deadline | Tag | Status |
 |------|-------|----------|-----|--------|
 | 1 | Text Processing and Exploratory Data Analysis | 23/10/2026 | `IRWA-2026-part-1` | Delivered |
-| 2 | Indexing and Evaluation | 30/10/2026 | `IRWA-2026-part-2` | Pending |
+| 2 | Indexing and Evaluation | 03/11/2026 | `IRWA-2026-part-2` | Delivered |
 | 3 | Ranking and Filtering | 20/11/2026 | `IRWA-2026-part-3` | Pending |
 | 4 | RAG, User Interface and Web Analytics | 29/11/2026 | `IRWA-2026-part-4` | Pending |
 
@@ -305,9 +305,43 @@ search("men slim jeans blue", index, idf, doc_norms, top_k=5)
 
 ---
 
-## Parts 3–4
+## Part 3: Ranking and Filtering
 
-To be added in the corresponding deliveries (ranking and filtering, RAG + user interface + web analytics).
+Everything for Part 3 is in **`IRWA_Part3_Ranking_Filtering.ipynb`**, which reuses the modules in `src/`.
+
+### Files
+
+```
+├── IRWA_Part3_Ranking_Filtering.ipynb      # Part 3: TF-IDF, BM25, custom and Word2Vec rankings of the test queries
+├── part3_rankings.csv                      # output: top 20 of every test query and method
+└── src/
+    ├── indexing.py                         # + document lengths, BM25 idf, product info (rating, discount, stock)
+    ├── ranking.py                          # rank_tfidf, rank_bm25, rank_custom
+    └── word2vec_ranking.py                 # train_word2vec, compute_doc_vectors, rank_word2vec
+```
+
+### How to run
+
+1. Install the libraries from the repository root (Part 3 adds `gensim` for Word2Vec, which also installs `scipy`, used for Kendall tau):
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Make sure `processed_corpus.json` is in the repository root.
+3. Start Jupyter **from the repository root** and run all cells in order:
+   ```bash
+   jupyter notebook IRWA_Part3_Ranking_Filtering.ipynb
+   ```
+   Building the index and training Word2Vec takes about 10 seconds.
+4. The notebook ranks the AND results of the 5 test queries of Part 2 (`TEST_QUERIES`) with the four methods (`METHODS`),
+   shows the top 20 (`TOP_K`) of each one (pid, title, score, rating, price, discount), saves them to
+   **`part3_rankings.csv`** (`query_id, query, method, rank, pid, title, score, rating, price, discount`) and shows a
+   comparison per query: overlap of the top 20 between every pair of methods and Kendall tau between TF-IDF and BM25.
+
+---
+
+## Part 4
+
+To be added in the corresponding delivery (RAG + user interface + web analytics).
 
 ## AI usage
 
