@@ -61,11 +61,18 @@ def get_product_info(corpus):
     return info
 
 
+def compute_mean_rating(product_info):
+    """Mean rating of the products that have one (neutral value for the unrated ones)."""
+    ratings = [rating for rating, _, _ in product_info.values() if rating is not None]
+    return sum(ratings) / len(ratings)
+
+
 def build_search_data(corpus, field="all_terms"):
     """Everything the rankers need, computed once: index, idfs, norms, lengths and product info."""
     index = build_index(corpus, field)
     idf = compute_idf(index, len(corpus))
     doc_lens = compute_doc_lengths(corpus, field)
+    product_info = get_product_info(corpus)
     return {
         "index": index,
         "idf": idf,
@@ -73,7 +80,8 @@ def build_search_data(corpus, field="all_terms"):
         "idf_bm25": compute_bm25_idf(index, len(corpus)),
         "doc_lens": doc_lens,
         "avg_len": sum(doc_lens.values()) / len(doc_lens),
-        "product_info": get_product_info(corpus),
+        "product_info": product_info,
+        "mean_rating": compute_mean_rating(product_info),
     }
 
 
