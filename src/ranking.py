@@ -38,6 +38,44 @@ def rank_bm25(query, pids, index, idf_bm25, doc_lens, avg_len, k1=1.2, b=0.75):
     return sorted(scores, key=lambda x: (-x[1], x[0]))
 
 
+# Default weights of the custom ranking (see rank_custom)
+CUSTOM_WEIGHTS = {
+    "rating": 0.5,          # weight of the normalised rating
+    "discount": 0.2,        # weight of the normalised discount
+    "out_of_stock": 0.5,    # multiplier applied to out of stock products
+    "neutral_rating": 3.0,  # rating given to products without rating (middle of the 1-5 scale)
+}
+
+
+def quality_factor(rating, discount, out_of_stock, weights=None):
+    """Quality factor of a product: (1 + w_r * rating + w_d * discount) * stock penalty.
+
+    rating is mapped from [1, 5] to [0, 1] and discount from [0, 100] to [0, 1].
+    """
+    w = {**CUSTOM_WEIGHTS, **(weights or {})}
+    if rating is None:
+        rating = w["neutral_rating"]
+    rating_norm = (rating - 1) / 4
+    discount_norm = (discount or 0) / 100
+    factor = 1 + w["rating"] * rating_norm + w["discount"] * discount_norm
+    return factor * w["out_of_stock"] if out_of_stock else factor
+
+
+def rank_custom(query, pids, index, idf_bm25, doc_lens, avg_len, product_info, weights=None,
+                k1=1.2, b=0.75):
+    """BM25 score min-max normalised over the results times the quality factor; returns [(pid, score)]."""
+    bm25 = rank_bm25(query, pids, index, idf_bm25, doc_lens, avg_len, k1, b)
+    if not bm25:
+        return []
+    high, low = bm25[0][1], bm25[-1][1]
+    scores = []
+    for pid, score in bm25:
+        # With a single score (or all equal) every document gets 1, only the quality decides
+        relevance = (score - low) / (high - low) if high > low else 1.0
+        scores.append((pid, relevance * quality_factor(*product_info[pid], weights)))
+    return sorted(scores, key=lambda x: (-x[1], x[0]))
+
+
 def search(query, index, idf, doc_norms, top_k=None):
     """AND search followed by tf-idf ranking; returns the top_k [(pid, score)]."""
     pids = conjunctive_search(query, index)

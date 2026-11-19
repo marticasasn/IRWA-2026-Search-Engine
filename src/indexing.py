@@ -47,6 +47,20 @@ def compute_bm25_idf(index, n_docs):
             for term, postings in index.items()}
 
 
+def get_product_info(corpus):
+    """Rating, discount and stock of every product: pid -> (rating, discount, out_of_stock).
+
+    Missing ratings and discounts are stored as None.
+    """
+    info = {}
+    for pid, rating, discount, oos in zip(corpus["pid"], corpus["average_rating_num"],
+                                          corpus["discount_num"], corpus["out_of_stock"]):
+        info[pid] = (None if pd.isna(rating) else float(rating),
+                     None if pd.isna(discount) else float(discount),
+                     bool(oos))
+    return info
+
+
 def conjunctive_search(query, index):
     """AND search: returns the set of pids that contain all the query terms."""
     terms = set(build_terms(query))
