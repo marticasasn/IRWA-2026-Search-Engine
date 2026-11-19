@@ -320,6 +320,8 @@ Everything for Part 3 is in **`IRWA_Part3_Ranking_Filtering.ipynb`**, which reus
     └── word2vec_ranking.py                 # train_word2vec, compute_doc_vectors, rank_word2vec
 ```
 
+`search_ranked(query, method, data, top_k=20, weights=None)` in `src/ranking.py`: AND search followed by the chosen ranking (`"tfidf"`, `"bm25"` or `"custom"`), returns the top_k `[(pid, score)]`; `data` is the dict returned by `build_search_data(corpus)` and `weights` overrides `CUSTOM_WEIGHTS` for `"custom"`.
+
 ### How to run
 
 1. Install the libraries from the repository root (Part 3 adds `gensim` for Word2Vec, which also installs `scipy`, used for Kendall tau):

@@ -24,7 +24,8 @@ def rank_tfidf(query, pids, index, idf, doc_norms):
 
 def rank_bm25(query, pids, index, idf_bm25, doc_lens, avg_len, k1=1.2, b=0.75):
     """Ranks the given pids by BM25 score; returns [(pid, score)]."""
-    terms = set(t for t in build_terms(query) if t in index)
+    # Sorted so the sum always runs in the same order and the scores are reproducible
+    terms = sorted(set(t for t in build_terms(query) if t in index))
 
     scores = []
     for pid in pids:

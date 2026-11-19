@@ -55,7 +55,7 @@
 1,women cotton kurta,custom,14,KTAF8FJVVYE2EDWN,Women Solid Cotton Blend Straight Kurta  (Yellow),1.2221556081967468,3.8,719.0,72.0
 1,women cotton kurta,custom,15,KTAF8FKVGGDFBHAE,Women Solid Cotton Blend Pathani Kurta  (Pink),1.2192833465740112,3.6,647.0,75.0
 1,women cotton kurta,custom,16,KTAFAJFFZYZTVNRA,Women Solid Cotton Blend Straight Kurta  (White),1.210652857082055,4.0,499.0,80.0
-1,women cotton kurta,custom,17,KTAFZFX7Y5UJGF8Y,Women Solid Cotton Blend Straight Kurta  (Light Blue),1.2055336698103893,5.0,390.0,64.0
+1,women cotton kurta,custom,17,KTAFZFX7Y5UJGF8Y,Women Solid Cotton Blend Straight Kurta  (Light Blue),1.2055336698103891,5.0,390.0,64.0
 1,women cotton kurta,custom,18,KTAFZTBNTJSU5KVN,Women Solid Pure Cotton Straight Kurta  (Orange),1.195005570367711,4.1,390.0,68.0
 1,women cotton kurta,custom,19,KTAF5SD3WHM2V9HZ,Women Printed Cotton Blend Straight Kurta  (Orange),1.1924364308996327,4.1,599.0,33.0
 1,women cotton kurta,custom,20,KTAFZCK5XEZCZXF8,Women Printed Cotton Linen Blend Straight Kurta  (Beige),1.1850589947711436,4.1,519.0,74.0
@@ -105,8 +105,8 @@
 2,men slim fit chinos,bm25,4,TROE3N2FYUQWF8DX,Rocky Slim Fit Men Beige Cotton Blend Trousers,9.90294893786071,3.6,496.0,44.0
 2,men slim fit chinos,bm25,5,TROE3N2GXGYWPZ3H,Rocky Slim Fit Men Silver Cotton Blend Trousers,9.90294893786071,3.6,456.0,49.0
 2,men slim fit chinos,bm25,6,TROE9B6GEHCE4YFP,Slim Fit Men Multicolor Cotton Blend Trousers,9.90294893786071,3.5,999.0,44.0
-2,men slim fit chinos,bm25,7,TROEFUFU3DCZFBHG,"Slim Fit Men Maroon, Black Cotton Blend Trousers",9.83336529050801,3.4,999.0,44.0
-2,men slim fit chinos,bm25,8,TROE3N2GDGHXPYYJ,"Rocky Slim Fit Men Silver, Beige Cotton Blend Trousers",9.764765928536805,3.3,999.0,44.0
+2,men slim fit chinos,bm25,7,TROEFUFU3DCZFBHG,"Slim Fit Men Maroon, Black Cotton Blend Trousers",9.833365290508008,3.4,999.0,44.0
+2,men slim fit chinos,bm25,8,TROE3N2GDGHXPYYJ,"Rocky Slim Fit Men Silver, Beige Cotton Blend Trousers",9.764765928536804,3.3,999.0,44.0
 2,men slim fit chinos,bm25,9,TROE9B6HRHMFTREG,Slim Fit Men Multicolor Cotton Blend Trousers,9.697129879585292,3.5,1499.0,44.0
 2,men slim fit chinos,bm25,10,TROE9B6JVKFH8WTM,Slim Fit Men Multicolor Cotton Blend Trousers,9.697129879585292,3.5,999.0,44.0
 2,men slim fit chinos,bm25,11,TROE9B6MPTHDJ8ZS,Slim Fit Men Multicolor Cotton Blend Trousers,9.697129879585292,3.2,1499.0,44.0
@@ -125,10 +125,10 @@
 2,men slim fit chinos,custom,4,TRODZZMJYWQTEGRY,Rocky Slim Fit Men Black Cotton Blend Trousers,1.2114947942028202,3.6,499.0,44.0
 2,men slim fit chinos,custom,5,TROE3N2FYUQWF8DX,Rocky Slim Fit Men Beige Cotton Blend Trousers,1.2114947942028202,3.6,496.0,44.0
 2,men slim fit chinos,custom,6,TROE9B6GEHCE4YFP,Slim Fit Men Multicolor Cotton Blend Trousers,1.2041612906059507,3.5,999.0,44.0
-2,men slim fit chinos,custom,7,TROEFUFU3DCZFBHG,"Slim Fit Men Maroon, Black Cotton Blend Trousers",1.180913546730216,3.4,999.0,44.0
+2,men slim fit chinos,custom,7,TROEFUFU3DCZFBHG,"Slim Fit Men Maroon, Black Cotton Blend Trousers",1.1809135467302156,3.4,999.0,44.0
 2,men slim fit chinos,custom,8,TROEC8RPUZYGFDZF,Slim Fit Men Multicolor Cotton Blend Trousers,1.1638457496282963,3.6,1499.0,44.0
 2,men slim fit chinos,custom,9,TROEC9FGJDNTYREE,Slim Fit Men Multicolor Cotton Blend Trousers,1.1600883783623452,3.4,1199.0,55.0
-2,men slim fit chinos,custom,10,TROE3N2GDGHXPYYJ,"Rocky Slim Fit Men Silver, Beige Cotton Blend Trousers",1.1580845635180488,3.3,999.0,44.0
+2,men slim fit chinos,custom,10,TROE3N2GDGHXPYYJ,"Rocky Slim Fit Men Silver, Beige Cotton Blend Trousers",1.1580845635180483,3.3,999.0,44.0
 2,men slim fit chinos,custom,11,TROEC8WK4RTVGGVP,Slim Fit Men Multicolor Cotton Blend Trousers,1.157740021321126,3.5,1483.0,45.0
 2,men slim fit chinos,custom,12,TROE9B6HRHMFTREG,Slim Fit Men Multicolor Cotton Blend Trousers,1.1568006785046385,3.5,1499.0,44.0
 2,men slim fit chinos,custom,13,TROE9B6JVKFH8WTM,Slim Fit Men Multicolor Cotton Blend Trousers,1.1568006785046385,3.5,999.0,44.0
@@ -185,13 +185,13 @@
 3,hooded full sleeve sweatshirt,bm25,4,SWSFYV4N7HJ8BHWM,Full Sleeve Solid Men Sweatshirt,13.130271148975439,3.2,649.0,63.0
 3,hooded full sleeve sweatshirt,bm25,5,SWSFYV4NUHK8YPR9,Full Sleeve Solid Men Sweatshirt,13.130271148975439,3.2,679.0,66.0
 3,hooded full sleeve sweatshirt,bm25,6,SWSFYV85ZTT9H7ZY,Full Sleeve Solid Men Sweatshirt,13.130271148975439,3.2,679.0,66.0
-3,hooded full sleeve sweatshirt,bm25,7,SWSFXMFP2RUM86QD,Full Sleeve Printed Women Sweatshirt,13.0371074620278,3.7,749.0,42.0
-3,hooded full sleeve sweatshirt,bm25,8,SWSFXMFPRTY4GKGF,Full Sleeve Printed Men Sweatshirt,13.0371074620278,3.7,949.0,50.0
-3,hooded full sleeve sweatshirt,bm25,9,SWSFXMFPVYZ2YGGQ,Full Sleeve Embroidered Men Sweatshirt,13.0371074620278,3.7,849.0,59.0
-3,hooded full sleeve sweatshirt,bm25,10,SWSFXMHDY9ZHDAW9,Full Sleeve Embroidered Women Sweatshirt,13.0371074620278,3.7,699.0,66.0
-3,hooded full sleeve sweatshirt,bm25,11,SWSFYFFFMWQMAPJJ,Full Sleeve Printed Men Sweatshirt,13.0371074620278,3.2,649.0,63.0
-3,hooded full sleeve sweatshirt,bm25,12,SWSFYFFYJCSGNGD8,Full Sleeve Printed Men Sweatshirt,13.0371074620278,3.2,649.0,63.0
-3,hooded full sleeve sweatshirt,bm25,13,SWSFPHFFKEGXGVHW,Full Sleeve Solid Men Sweatshirt,13.022038515898968,4.0,799.0,65.0
+3,hooded full sleeve sweatshirt,bm25,7,SWSFXMFP2RUM86QD,Full Sleeve Printed Women Sweatshirt,13.037107462027798,3.7,749.0,42.0
+3,hooded full sleeve sweatshirt,bm25,8,SWSFXMFPRTY4GKGF,Full Sleeve Printed Men Sweatshirt,13.037107462027798,3.7,949.0,50.0
+3,hooded full sleeve sweatshirt,bm25,9,SWSFXMFPVYZ2YGGQ,Full Sleeve Embroidered Men Sweatshirt,13.037107462027798,3.7,849.0,59.0
+3,hooded full sleeve sweatshirt,bm25,10,SWSFXMHDY9ZHDAW9,Full Sleeve Embroidered Women Sweatshirt,13.037107462027798,3.7,699.0,66.0
+3,hooded full sleeve sweatshirt,bm25,11,SWSFYFFFMWQMAPJJ,Full Sleeve Printed Men Sweatshirt,13.037107462027798,3.2,649.0,63.0
+3,hooded full sleeve sweatshirt,bm25,12,SWSFYFFYJCSGNGD8,Full Sleeve Printed Men Sweatshirt,13.037107462027798,3.2,649.0,63.0
+3,hooded full sleeve sweatshirt,bm25,13,SWSFPHFFKEGXGVHW,Full Sleeve Solid Men Sweatshirt,13.02203851589897,4.0,799.0,65.0
 3,hooded full sleeve sweatshirt,bm25,14,SWSFXMFPNZQGZZNE,Full Sleeve Printed Women Sweatshirt,12.945281544424482,,849.0,55.0
 3,hooded full sleeve sweatshirt,bm25,15,SWSFXMFPYYTZUZ3Z,Full Sleeve Printed Men Sweatshirt,12.945281544424482,3.7,799.0,60.0
 3,hooded full sleeve sweatshirt,bm25,16,SWSFXMHBEHXUN36V,Full Sleeve Solid Women Sweatshirt,12.945281544424482,3.7,949.0,54.0
@@ -199,23 +199,23 @@
 3,hooded full sleeve sweatshirt,bm25,18,SWSFYFFFZBZKUQUS,Full Sleeve Printed Men Sweatshirt,12.945281544424482,3.2,679.0,66.0
 3,hooded full sleeve sweatshirt,bm25,19,SWSFYFFYFXCMPBDZ,Full Sleeve Printed Women Sweatshirt,12.945281544424482,3.2,679.0,66.0
 3,hooded full sleeve sweatshirt,bm25,20,SWSFYFFYQ7Z3ZKN6,Full Sleeve Printed Women Sweatshirt,12.945281544424482,3.2,679.0,66.0
-3,hooded full sleeve sweatshirt,custom,1,SWSFPHFFKEGXGVHW,Full Sleeve Solid Men Sweatshirt,1.2701967986598033,4.0,799.0,65.0
-3,hooded full sleeve sweatshirt,custom,2,SWSFXMHDY9ZHDAW9,Full Sleeve Embroidered Women Sweatshirt,1.2517380474248125,3.7,699.0,66.0
-3,hooded full sleeve sweatshirt,custom,3,SWSFXMFPVYZ2YGGQ,Full Sleeve Embroidered Men Sweatshirt,1.244830545389358,3.7,849.0,59.0
+3,hooded full sleeve sweatshirt,custom,1,SWSFPHFFKEGXGVHW,Full Sleeve Solid Men Sweatshirt,1.2701967986598037,4.0,799.0,65.0
+3,hooded full sleeve sweatshirt,custom,2,SWSFXMHDY9ZHDAW9,Full Sleeve Embroidered Women Sweatshirt,1.251738047424812,3.7,699.0,66.0
+3,hooded full sleeve sweatshirt,custom,3,SWSFXMFPVYZ2YGGQ,Full Sleeve Embroidered Men Sweatshirt,1.2448305453893578,3.7,849.0,59.0
 3,hooded full sleeve sweatshirt,custom,4,SWSFVNAYAGBGKAPZ,Full Sleeve Ombre Men Sweatshirt,1.2425717711082933,4.6,949.0,50.0
-3,hooded full sleeve sweatshirt,custom,5,SWSFXMFPRTY4GKGF,Full Sleeve Printed Men Sweatshirt,1.2359494713437742,3.7,949.0,50.0
+3,hooded full sleeve sweatshirt,custom,5,SWSFXMFPRTY4GKGF,Full Sleeve Printed Men Sweatshirt,1.235949471343774,3.7,949.0,50.0
 3,hooded full sleeve sweatshirt,custom,6,SWSFYV4NUHK8YPR9,Full Sleeve Solid Men Sweatshirt,1.231,3.2,679.0,66.0
 3,hooded full sleeve sweatshirt,custom,7,SWSFYV85ZTT9H7ZY,Full Sleeve Solid Men Sweatshirt,1.231,3.2,679.0,66.0
 3,hooded full sleeve sweatshirt,custom,8,SWSFXMFPYYTZUZ3Z,Full Sleeve Printed Men Sweatshirt,1.2293742149509943,3.7,799.0,60.0
-3,hooded full sleeve sweatshirt,custom,9,SWSFXMFP2RUM86QD,Full Sleeve Printed Women Sweatshirt,1.2280551833032551,3.7,749.0,42.0
+3,hooded full sleeve sweatshirt,custom,9,SWSFXMFP2RUM86QD,Full Sleeve Printed Women Sweatshirt,1.2280551833032547,3.7,749.0,42.0
 3,hooded full sleeve sweatshirt,custom,10,SWSFXZWGFKHNG88S,Full Sleeve Solid Men Sweatshirt,1.228,3.2,649.0,63.0
 3,hooded full sleeve sweatshirt,custom,11,SWSFXZWGMGVDUCXA,Full Sleeve Printed Women Sweatshirt,1.228,3.2,649.0,63.0
 3,hooded full sleeve sweatshirt,custom,12,SWSFXZWWYXPZXPTY,Full Sleeve Printed Men Sweatshirt,1.228,3.2,649.0,63.0
 3,hooded full sleeve sweatshirt,custom,13,SWSFYV4N7HJ8BHWM,Full Sleeve Solid Men Sweatshirt,1.228,3.2,649.0,63.0
 3,hooded full sleeve sweatshirt,custom,14,SWSFXMHBEHXUN36V,Full Sleeve Solid Women Sweatshirt,1.2235316444244946,3.7,949.0,54.0
-3,hooded full sleeve sweatshirt,custom,15,SWSFYFFFMWQMAPJJ,Full Sleeve Printed Men Sweatshirt,1.2117732142196842,3.2,649.0,63.0
-3,hooded full sleeve sweatshirt,custom,16,SWSFYFFYJCSGNGD8,Full Sleeve Printed Men Sweatshirt,1.2117732142196842,3.2,649.0,63.0
-3,hooded full sleeve sweatshirt,custom,17,SWSE8FYZSATFYBG7,Full Sleeve Solid Men Sweatshirt,1.210847570330566,3.8,549.0,72.0
+3,hooded full sleeve sweatshirt,custom,15,SWSFYFFFMWQMAPJJ,Full Sleeve Printed Men Sweatshirt,1.211773214219684,3.2,649.0,63.0
+3,hooded full sleeve sweatshirt,custom,16,SWSFYFFYJCSGNGD8,Full Sleeve Printed Men Sweatshirt,1.211773214219684,3.2,649.0,63.0
+3,hooded full sleeve sweatshirt,custom,17,SWSE8FYZSATFYBG7,Full Sleeve Solid Men Sweatshirt,1.2108475703305654,3.8,549.0,72.0
 3,hooded full sleeve sweatshirt,custom,18,SWSFXZWUMUXNUHSZ,Full Sleeve Solid Men Sweatshirt,1.1987007196868704,3.2,679.0,66.0
 3,hooded full sleeve sweatshirt,custom,19,SWSFYFFFZBZKUQUS,Full Sleeve Printed Men Sweatshirt,1.1987007196868704,3.2,679.0,66.0
 3,hooded full sleeve sweatshirt,custom,20,SWSFYFFYFXCMPBDZ,Full Sleeve Printed Women Sweatshirt,1.1987007196868704,3.2,679.0,66.0
@@ -333,7 +333,7 @@
 5,women black leggings,tfidf,12,TKPFUY98MWHVV2W5,Printed Women Black Track Pants,0.12374630452448027,3.9,3249.0,35.0
 5,women black leggings,tfidf,13,TROEWT2N4GNNPBHM,Slim Fit Women Multicolor Polycotton Trousers,0.10151101650003731,3.9,570.0,40.0
 5,women black leggings,bm25,1,TKPFGZYS9CWTRMZJ,Solid Women Black Track Pants,8.73998627938426,3.3,1448.0,37.0
-5,women black leggings,bm25,2,TKPFGZYSMFQGDESU,Solid Women Black Track Pants,8.578325662182808,3.4,2999.0,50.0
+5,women black leggings,bm25,2,TKPFGZYSMFQGDESU,Solid Women Black Track Pants,8.57832566218281,3.4,2999.0,50.0
 5,women black leggings,bm25,3,TKPFK3W6NVCGUTHR,Solid Women Black Track Pants,8.499779920219888,3.0,1484.0,55.0
 5,women black leggings,bm25,4,TKPFK3W6VQFCYNTQ,Solid Women Black Track Pants,8.422699067497986,4.2,2017.0,32.0
 5,women black leggings,bm25,5,SRTFGZY9UCFAAEHM,Solid Women Black Sports Shorts,7.988758218906563,4.3,1985.0,33.0
@@ -344,18 +344,18 @@
 5,women black leggings,bm25,10,TKPFUY8XUNRHPNDZ,Printed Women Black Track Pants,6.7074861712427865,4.3,2144.0,35.0
 5,women black leggings,bm25,11,TKPFUY98MWHVV2W5,Printed Women Black Track Pants,6.606001166056174,3.9,3249.0,35.0
 5,women black leggings,bm25,12,TROEWT27ZGBUPCZM,Slim Fit Women Multicolor Polycotton Trousers,6.043942203951191,3.3,590.0,40.0
-5,women black leggings,bm25,13,TROEWT2N4GNNPBHM,Slim Fit Women Multicolor Polycotton Trousers,5.387121971079884,3.9,570.0,40.0
-5,women black leggings,custom,1,TKPFGZYSMFQGDESU,Solid Women Black Track Pants,1.1706947192389228,3.4,2999.0,50.0
+5,women black leggings,bm25,13,TROEWT2N4GNNPBHM,Slim Fit Women Multicolor Polycotton Trousers,5.3871219710798846,3.9,570.0,40.0
+5,women black leggings,custom,1,TKPFGZYSMFQGDESU,Solid Women Black Track Pants,1.1706947192389234,3.4,2999.0,50.0
 5,women black leggings,custom,2,TKPFK3W6VQFCYNTQ,Solid Women Black Track Pants,1.151628491818255,4.2,2017.0,32.0
 5,women black leggings,custom,3,TKPFK3W6NVCGUTHR,Solid Women Black Track Pants,1.118671226695288,3.0,1484.0,55.0
 5,women black leggings,custom,4,SRTFGZY9UCFAAEHM,Solid Women Black Sports Shorts,0.9935967903892983,4.3,1985.0,33.0
-5,women black leggings,custom,5,JEAFANJNYQRETCSN,Stretchable Slim Women Black Jeans  (Pack of 2),0.7232140351707403,3.7,1275.0,57.0
-5,women black leggings,custom,6,TKPFN5S8QKWKFHCM,Solid Women Black Track Pants,0.6123554328856102,4.9,4499.0,0.0
-5,women black leggings,custom,7,TKPF4GGX6TAYKPCQ,"Printed, Solid Women Grey Track Pants",0.5195986300017826,2.3,1199.0,67.0
-5,women black leggings,custom,8,TKPF4GGXRGJYNJVE,"Printed, Solid Women Grey Track Pants",0.5195986300017826,2.3,1199.0,67.0
-5,women black leggings,custom,9,TKPFUY8XUNRHPNDZ,Printed Women Black Track Pants,0.5050508851535657,4.3,2144.0,35.0
-5,women black leggings,custom,10,TKPFUY98MWHVV2W5,Printed Women Black Track Pants,0.45532596947827736,3.9,3249.0,35.0
-5,women black leggings,custom,11,TROEWT27ZGBUPCZM,Slim Fit Women Multicolor Polycotton Trousers,0.2375266217555987,3.3,590.0,40.0
+5,women black leggings,custom,5,JEAFANJNYQRETCSN,Stretchable Slim Women Black Jeans  (Pack of 2),0.7232140351707402,3.7,1275.0,57.0
+5,women black leggings,custom,6,TKPFN5S8QKWKFHCM,Solid Women Black Track Pants,0.61235543288561,4.9,4499.0,0.0
+5,women black leggings,custom,7,TKPF4GGX6TAYKPCQ,"Printed, Solid Women Grey Track Pants",0.5195986300017824,2.3,1199.0,67.0
+5,women black leggings,custom,8,TKPF4GGXRGJYNJVE,"Printed, Solid Women Grey Track Pants",0.5195986300017824,2.3,1199.0,67.0
+5,women black leggings,custom,9,TKPFUY8XUNRHPNDZ,Printed Women Black Track Pants,0.5050508851535654,4.3,2144.0,35.0
+5,women black leggings,custom,10,TKPFUY98MWHVV2W5,Printed Women Black Track Pants,0.4553259694782771,3.9,3249.0,35.0
+5,women black leggings,custom,11,TROEWT27ZGBUPCZM,Slim Fit Women Multicolor Polycotton Trousers,0.23752662175559844,3.3,590.0,40.0
 5,women black leggings,custom,12,TROEWT2N4GNNPBHM,Slim Fit Women Multicolor Polycotton Trousers,0.0,3.9,570.0,40.0
 5,women black leggings,custom,13,TKPFGZYS9CWTRMZJ,Solid Women Black Track Pants,1.2094999999999998,3.3,1448.0,37.0
 5,women black leggings,word2vec,1,TKPFK3W6NVCGUTHR,Solid Women Black Track Pants,0.6077975630760193,3.0,1484.0,55.0
