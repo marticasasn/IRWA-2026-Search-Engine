@@ -61,6 +61,22 @@ def get_product_info(corpus):
     return info
 
 
+def build_search_data(corpus, field="all_terms"):
+    """Everything the rankers need, computed once: index, idfs, norms, lengths and product info."""
+    index = build_index(corpus, field)
+    idf = compute_idf(index, len(corpus))
+    doc_lens = compute_doc_lengths(corpus, field)
+    return {
+        "index": index,
+        "idf": idf,
+        "doc_norms": compute_doc_norms(index, idf),
+        "idf_bm25": compute_bm25_idf(index, len(corpus)),
+        "doc_lens": doc_lens,
+        "avg_len": sum(doc_lens.values()) / len(doc_lens),
+        "product_info": get_product_info(corpus),
+    }
+
+
 def conjunctive_search(query, index):
     """AND search: returns the set of pids that contain all the query terms."""
     terms = set(build_terms(query))

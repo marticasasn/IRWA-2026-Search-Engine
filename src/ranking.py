@@ -81,3 +81,22 @@ def search(query, index, idf, doc_norms, top_k=None):
     pids = conjunctive_search(query, index)
     ranking = rank_tfidf(query, pids, index, idf, doc_norms)
     return ranking[:top_k] if top_k else ranking
+
+
+def search_ranked(query, method, data, top_k=20, weights=None):
+    """AND search followed by the chosen ranking ("tfidf", "bm25" or "custom"); returns the top_k [(pid, score)].
+
+    data is the dict returned by build_search_data. weights is only used by "custom".
+    """
+    d = data
+    pids = conjunctive_search(query, d["index"])
+    if method == "tfidf":
+        ranking = rank_tfidf(query, pids, d["index"], d["idf"], d["doc_norms"])
+    elif method == "bm25":
+        ranking = rank_bm25(query, pids, d["index"], d["idf_bm25"], d["doc_lens"], d["avg_len"])
+    elif method == "custom":
+        ranking = rank_custom(query, pids, d["index"], d["idf_bm25"], d["doc_lens"], d["avg_len"],
+                              d["product_info"], weights)
+    else:
+        raise ValueError(f"Unknown ranking method: {method}")
+    return ranking[:top_k] if top_k else ranking
