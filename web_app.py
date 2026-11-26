@@ -1,12 +1,15 @@
+import atexit
 import os
 import sys
+import time
 from json import JSONEncoder
 
 import httpagentparser  # for getting the user agent as json
-from flask import Flask, abort, jsonify, redirect, render_template, session, url_for
+from flask import Flask, abort, g, jsonify, redirect, render_template, session, url_for
 from flask import request
 
 from myapp.analytics.analytics_data import AnalyticsData, ClickedDoc
+from myapp.analytics.dashboard import build_charts, compute_kpis
 from myapp.search.objects import Document, StatsDocument
 from myapp.search.search_engine import SEARCH_OPTIONS, SearchEngine, parse_options
 from myapp.generation.rag import RAGGenerator
@@ -38,8 +41,13 @@ app.secret_key = os.getenv("SECRET_KEY")
 app.config["SESSION_COOKIE_NAME"] = os.getenv("SESSION_COOKIE_NAME", "session")
 # instantiate our search engine (loads the corpus and the index once, cached in cache/)
 search_engine = SearchEngine(raw_path=os.getenv("DATA_FILE_PATH", "fashion_products_dataset.json"))
-# instantiate our in memory persistence
-analytics_data = AnalyticsData()
+# instantiate our in memory persistence, saved to a JSON file (gitignored); ANALYTICS_FILE overrides the
+# path, e.g. to look at the simulated traffic of scripts/simulate_traffic.py
+ANALYTICS_FILE = os.getenv("ANALYTICS_FILE", os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                                          "data", "analytics.json"))
+analytics_data = AnalyticsData(path=ANALYTICS_FILE)
+atexit.register(analytics_data.save)
+print("Analytics data file:", ANALYTICS_FILE)
 # instantiate the RAG generators: the template's one (baseline) and ours (improved)
 rag_generators = {"improved": ImprovedRAGGenerator(), "baseline": RAGGenerator()}
 DEFAULT_RAG = "improved"
@@ -49,9 +57,35 @@ METHOD_LABELS = {"custom": "Custom (BM25 + rating + discount)",
                  "custom_title": "Custom + title coverage", "bm25": "BM25", "tfidf": "TF-IDF cosine"}
 
 
+# Requests that do not count as "the next request" for the dwell time fallback
+DWELL_IGNORED_PREFIXES = ("/static/", "/dwell", "/favicon.ico")
+
+
 def get_doc_object(pid):
     """Product as the template's Document object (used by the stats and dashboard pages)."""
     return Document(**search_engine.get_document(pid))
+
+
+@app.before_request
+def start_request():
+    """Starts the request timer and resolves the physical analytics session of the user."""
+    g.start_time = time.perf_counter()
+    session_id = analytics_data.touch_session(session.get("sid"), session.get("last_seen"),
+                                              request.headers.get("User-Agent"), request.remote_addr)
+    session["sid"] = session_id
+    session["last_seen"] = analytics_data.now().isoformat()
+    g.session_id = session_id
+    if not request.path.startswith(DWELL_IGNORED_PREFIXES):
+        analytics_data.fill_dwell_from_next_request(session_id)
+
+
+@app.after_request
+def log_request(response):
+    """Stores the request in fact_request and saves the analytics file (at most every few seconds)."""
+    elapsed_ms = (time.perf_counter() - g.get("start_time", time.perf_counter())) * 1000
+    analytics_data.record_request(g.get("session_id"), request.path, request.method, response.status_code, elapsed_ms)
+    analytics_data.save(force=False)
+    return response
 
 
 # Home URL "/"
@@ -102,6 +136,8 @@ def search_form_post():
 
     found_count = info["total"]
     session['last_found_count'] = found_count
+    analytics_data.record_query(search_id, g.session_id, search_query, method, found_count, info["fallback"],
+                                info["query_terms"], options)
 
     print(session)
 
@@ -160,16 +196,26 @@ def doc_details():
     if doc is None:
         abort(404)
 
-    # store data in statistics table 1
-    if clicked_doc_id in analytics_data.fact_clicks.keys():
-        analytics_data.fact_clicks[clicked_doc_id] += 1
-    else:
-        analytics_data.fact_clicks[clicked_doc_id] = 1
+    # store the click in fact_click (it also updates the template's counter table fact_clicks);
+    # only clicks coming from a results page (with a search_id) are counted
+    click_id = None
+    if search_id:
+        click_id = analytics_data.record_click(search_id, g.session_id, clicked_doc_id, rank)
 
-    print("fact_clicks count for id={} is {}".format(clicked_doc_id, analytics_data.fact_clicks[clicked_doc_id]))
-    print(analytics_data.fact_clicks)
+    print("fact_clicks count for id={} is {}".format(clicked_doc_id, analytics_data.fact_clicks.get(clicked_doc_id, 0)))
     return render_template('doc_details.html', page_title="Product details", doc=doc, search_id=search_id, rank=rank,
-                           query=session.get('last_search_query'))
+                           query=session.get('last_search_query'), click_id=click_id)
+
+
+@app.route('/dwell', methods=['POST'])
+def dwell():
+    """Receives the dwell time beacon of the details page (click_id, dwell_ms)."""
+    try:
+        stored = analytics_data.record_dwell_beacon(request.form.get("click_id", ""), g.session_id,
+                                                    float(request.form.get("dwell_ms", "")))
+    except ValueError:
+        stored = False
+    return ("", 204) if stored else ("", 400)
 
 
 @app.route('/stats', methods=['GET'])
@@ -193,17 +239,16 @@ def stats():
 
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
-    visited_docs = []
-    for doc_id in analytics_data.fact_clicks.keys():
-        d: Document = get_doc_object(doc_id)
-        doc = ClickedDoc(doc_id, d.description, analytics_data.fact_clicks[doc_id])
-        visited_docs.append(doc)
+    """Analytics dashboard: KPIs and Altair charts built from the star schema tables."""
+    sessions, _, queries, clicks = analytics_data.dataframes()
 
-    # simulate sort by ranking
-    visited_docs.sort(key=lambda doc: doc.counter, reverse=True)
+    def title_of(pid):
+        """Title of a product (None if unknown)."""
+        doc = search_engine.get_document(pid)
+        return doc["title"] if doc else None
 
-    for doc in visited_docs: print(doc)
-    return render_template('dashboard.html', visited_docs=visited_docs)
+    return render_template('dashboard.html', page_title="Dashboard", kpis=compute_kpis(sessions, queries, clicks),
+                           charts=build_charts(sessions, queries, clicks, title_of), data_file=ANALYTICS_FILE)
 
 
 # New route added for generating an examples of basic Altair plot (used for dashboard)

@@ -79,4 +79,24 @@
     {% if doc.url %}
         <a class="btn btn-primary" href="{{ doc.url }}" target="_blank" rel="noopener noreferrer">View on Flipkart</a>
     {% endif %}
+
+    {% if click_id %}
+        <script>
+            // Dwell time: when the page is hidden or left, send the time since it loaded (the server keeps
+            // the largest value of this click; the next request of the session is the fallback)
+            (function () {
+                var loaded = Date.now();
+                function sendDwell() {
+                    var data = new FormData();
+                    data.append("click_id", "{{ click_id }}");
+                    data.append("dwell_ms", String(Date.now() - loaded));
+                    navigator.sendBeacon("/dwell", data);
+                }
+                window.addEventListener("pagehide", sendDwell);
+                document.addEventListener("visibilitychange", function () {
+                    if (document.visibilityState === "hidden") { sendDwell(); }
+                });
+            })();
+        </script>
+    {% endif %}
 {% endblock %}
