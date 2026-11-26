@@ -1,7 +1,22 @@
 {% extends "base.html" %}
 {% block page_title %}{{ page_title }}{% endblock %}
 {% block content %}
-    Found <strong>{{ found_counter }}</strong> results...
+    <form method="POST" action="/search" class="mb-3">
+        <div class="input-group">
+            <input class="form-control" name="search-query" type="search" value="{{ query }}" aria-label="Search" required>
+            <select class="custom-select results-method" name="method" aria-label="Ranking method">
+                {% for value, label in methods.items() %}
+                    <option value="{{ value }}" {% if value == method %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <div class="input-group-append">
+                <button class="btn btn-primary" type="submit">Search</button>
+            </div>
+        </div>
+    </form>
+
+    Found <strong>{{ found_counter }}</strong> results for <strong>"{{ query }}"</strong>
+    <span class="text-muted">(ranking: {{ methods[method] }})</span>
     <hr>
     {% if rag_response %}
         <div class="mb-4 p-3" style="border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
@@ -10,18 +25,40 @@
         </div>
     {% endif %}
     <hr>
-    {% for item in results_list %}
-        <div class="pb-3">
-            <div class="doc-title">
-                <a href="{{ item.url }}">{{ item.title }}...
-                </a>
-            </div>
-            <div class="doc-desc">
-                {{ item.doc_date }} — {{ item.description }}
-            </div>
-
+    {% if not results_list %}
+        <div class="alert alert-warning">
+            No products contain all the words of <strong>"{{ query }}"</strong>.
+            Try fewer or more general words.
         </div>
-
-    {% endfor %}
+    {% else %}
+        <ol class="results-list">
+            {% for item in results_list %}
+                <li class="pb-3 result-item">
+                    <div class="doc-title">
+                        <a href="{{ item.details_url }}">{{ item.title }}</a>
+                        {% if item.out_of_stock %}<span class="badge badge-secondary">Out of stock</span>{% endif %}
+                    </div>
+                    <div class="text-muted small">
+                        {% if item.brand %}{{ item.brand }}{% else %}Unknown brand{% endif %}
+                        {% if item.sub_category %} · {{ item.sub_category }}{% endif %}
+                    </div>
+                    <div class="doc-price">
+                        {% if item.selling_price %}<strong>₹{{ item.selling_price }}</strong>{% endif %}
+                        {% if item.actual_price and item.actual_price != item.selling_price %}
+                            <del class="text-muted">₹{{ item.actual_price }}</del>
+                        {% endif %}
+                        {% if item.discount %}<span class="text-success">{{ item.discount }}</span>{% endif %}
+                        · Rating: {% if item.average_rating %}{{ item.average_rating }} ★{% else %}no rating{% endif %}
+                    </div>
+                    {% if item.description %}
+                        <div class="doc-desc">{{ item.description | truncate(200) }}</div>
+                    {% endif %}
+                    <div class="small">
+                        {% if item.url %}<a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">View on Flipkart</a> · {% endif %}
+                        <span class="text-muted">score {{ '%.4f' | format(item.score) }}</span>
+                    </div>
+                </li>
+            {% endfor %}
+        </ol>
+    {% endif %}
 {% endblock %}
-

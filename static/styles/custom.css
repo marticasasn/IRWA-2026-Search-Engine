@@ -60,3 +60,16 @@ input[type=submit]:hover {
     font-size: 0.95em;
     adding-left: 5px;
 }
+
+/* Part 4: results and details pages */
+.results-method {
+    max-width: 230px;
+}
+
+.result-item .doc-title {
+    font-size: 1.1em;
+}
+
+.img-thumbnail {
+    max-height: 128px;
+}
