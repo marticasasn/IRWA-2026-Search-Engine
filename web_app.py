@@ -45,7 +45,8 @@ rag_generators = {"improved": ImprovedRAGGenerator(), "baseline": RAGGenerator()
 DEFAULT_RAG = "improved"
 
 DEFAULT_METHOD = "custom"
-METHOD_LABELS = {"custom": "Custom (BM25 + rating + discount)", "bm25": "BM25", "tfidf": "TF-IDF cosine"}
+METHOD_LABELS = {"custom": "Custom (BM25 + rating + discount)",
+                 "custom_title": "Custom + title coverage", "bm25": "BM25", "tfidf": "TF-IDF cosine"}
 
 
 def get_doc_object(pid):

@@ -17,16 +17,16 @@ from functools import lru_cache
 
 from src.indexing import build_search_data, conjunctive_search, load_corpus
 from src.preprocessing import build_terms, build_terms_web
-from src.ranking import rank_bm25, rank_custom, rank_tfidf
+from src.ranking import CUSTOM_TITLE_WEIGHT, rank_bm25, rank_custom, rank_tfidf
 
 # Repository root, so the default paths work whatever the current directory is
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Bump this when the cached structure changes so old pickles are rebuilt
-CACHE_VERSION = 2
+CACHE_VERSION = 3
 
 # Ranking methods accepted by search (same names as search_ranked)
-METHODS = ("custom", "bm25", "tfidf")
+METHODS = ("custom", "custom_title", "bm25", "tfidf")
 
 # Raw dataset fields shown in the results list
 DISPLAY_FIELDS = ("pid", "title", "description", "brand", "category", "sub_category",
@@ -108,7 +108,7 @@ def or_search(query, index, analyzer):
 
 
 def rank_pids(method, query, pids, data, analyzer):
-    """Ranks pids with the chosen Part 3 ranker ("tfidf", "bm25" or "custom"); returns [(pid, score)]."""
+    """Ranks pids with the chosen ranker ("tfidf", "bm25", "custom" or "custom_title"); returns [(pid, score)]."""
     if method == "tfidf":
         return rank_tfidf(query, pids, data["index"], data["idf"], data["doc_norms"], analyzer=analyzer)
     if method == "bm25":
@@ -117,6 +117,10 @@ def rank_pids(method, query, pids, data, analyzer):
     if method == "custom":
         return rank_custom(query, pids, data["index"], data["idf_bm25"], data["doc_lens"], data["avg_len"],
                            data["product_info"], mean_rating=data["mean_rating"], analyzer=analyzer)
+    if method == "custom_title":
+        return rank_custom(query, pids, data["index"], data["idf_bm25"], data["doc_lens"], data["avg_len"],
+                           data["product_info"], {"title": CUSTOM_TITLE_WEIGHT}, mean_rating=data["mean_rating"],
+                           analyzer=analyzer, title_terms=data["title_terms"])
     raise ValueError(f"Unknown ranking method: {method}")
 
 
@@ -196,6 +200,8 @@ class SearchEngine:
             "title_terms": dict(zip(corpus["pid"], map(frozenset, title_terms))),
             "category_terms": dict(zip(corpus["pid"], map(frozenset, category_terms))),
         }
+        # custom_title must compare the query with the title terms of the same analyzer
+        web["data"]["title_terms"] = web["title_terms"]
         documents = load_raw_documents(self.raw_path)
         return {
             "indexes": {"base": base, "web": web},
