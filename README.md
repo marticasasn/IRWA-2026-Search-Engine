@@ -385,8 +385,8 @@ results and web analytics.
    - `DATA_FILE_PATH`: raw dataset, `fashion_products_dataset.json` (repository root).
    - `GROQ_API_KEY`: your Groq key (create one at https://console.groq.com/keys). Only needed for the AI summary;
      if it is empty the app works and the summary says that RAG is not available.
-   - `GROQ_MODEL`: a chat model available to your key. If Groq answers `model_not_found` (the template's
-     `llama-3.1-8b-instant` may be retired), pick one from https://console.groq.com/docs/models, e.g. `openai/gpt-oss-20b`.
+   - `GROQ_MODEL`: `openai/gpt-oss-20b`. The template's `llama-3.1-8b-instant` is no longer available on Groq
+     (it answers `model_not_found`), so both the baseline and the improved RAG use `openai/gpt-oss-20b`.
    - `ANALYTICS_FILE` (optional): where the analytics are saved, default `data/analytics.json`.
 3. `processed_corpus.json` (Part 1 output) must be in the repository root.
 
@@ -415,7 +415,8 @@ Then open **http://localhost:8088**. The first start builds both indexes and wri
 
 ### AI summary: baseline vs improved
 
-The summary is shown on top of the results and loaded after the page. The select in the summary box switches
+Both generators use the model in `GROQ_MODEL` (`openai/gpt-oss-20b`; the template's `llama-3.1-8b-instant` is no
+longer available on Groq). The summary is shown on top of the results and loaded after the page. The select in the summary box switches
 between **Improved** (default, `ImprovedRAGGenerator`) and **Baseline** (template `RAGGenerator`); the choice is
 kept in the session. Each improvement can be switched off in the constructor:
 `ImprovedRAGGenerator(rich_context=True, filter_results=True, handle_no_good=True, strict_prompt=True,

@@ -96,7 +96,8 @@ List of what was implemented and where. Paths are relative to the repository roo
   baseline/improved select (default improved, choice kept in the session).
 - Comparison: `scripts/rag_compare.py` -> `docs/rag_comparison.md` (5 test queries + "something nice to wear",
   "laptop charger", "cheap black tshirt under 300"; retrieved products and both answers side by side).
-  Generated with `GROQ_MODEL=openai/gpt-oss-20b`.
+  Generated with `GROQ_MODEL=openai/gpt-oss-20b`, the model of both generators (the template's
+  `llama-3.1-8b-instant` is no longer available on Groq).
 
 ## Web analytics (`myapp/analytics/`)
 
