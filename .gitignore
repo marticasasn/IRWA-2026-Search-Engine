@@ -4,3 +4,5 @@ __pycache__/
 # Part 4: local secrets and the search data cache
 .env
 cache/
+# Part 4: analytics data (real and simulated)
+data/
