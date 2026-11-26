@@ -4,6 +4,22 @@ from urllib.parse import urlencode
 from src.engine import METHODS, SearchEngine as CoreSearchEngine
 
 
+# Search switches of src.engine.SearchEngine.search_with_info shown in the UI (all on by default)
+SEARCH_OPTIONS = {
+    "protected_words": "Protected words (no stemming of leggings, shorts, ...)",
+    "field_boost": "Boost title / category matches",
+    "or_fallback": "OR fallback when no exact match",
+    "collapse_duplicates": "Hide near-duplicates",
+}
+
+
+def parse_options(form):
+    """Reads the search switches from a submitted form; if the form has no options block, all are on."""
+    if form.get("options-form") is None:
+        return {name: True for name in SEARCH_OPTIONS}
+    return {name: form.get(name) == "on" for name in SEARCH_OPTIONS}
+
+
 def details_url(pid, search_id, rank):
     """Url of our details page; keeps pid, search_id and rank for the click analytics."""
     return "/doc_details?" + urlencode({"pid": pid, "search_id": search_id, "rank": rank})
@@ -20,17 +36,20 @@ class SearchEngine:
         source = "cache" if self.engine.from_cache else "corpus (cache rebuilt)"
         print(f"Search engine ready in {self.engine.startup_time:.2f}s, loaded from {source}")
 
-    def search(self, search_query, search_id, method="custom", top_k=20):
-        """Ranked search; every result dict also gets search_id and the details_url to our page."""
-        print("Search query:", search_query, "| method:", method)
+    def search(self, search_query, search_id, method="custom", top_k=20, options=None):
+        """Ranked search; returns the info dict of src.engine.SearchEngine.search_with_info
+        (results, total, fallback, hidden, query_terms). Every result dict also gets search_id and the
+        details_url to our page. options are the search switches (see SEARCH_OPTIONS)."""
+        print("Search query:", search_query, "| method:", method, "| options:", options)
         start = time.perf_counter()
-        results = self.engine.search(search_query, method=method, top_k=top_k)
-        print(f"Search took {(time.perf_counter() - start) * 1000:.1f} ms, {len(results)} results")
+        info = self.engine.search_with_info(search_query, method=method, top_k=top_k, **(options or {}))
+        info["time_ms"] = (time.perf_counter() - start) * 1000
+        print(f"Search took {info['time_ms']:.1f} ms, {len(info['results'])} shown of {info['total']}")
 
-        for result in results:
+        for result in info["results"]:
             result["search_id"] = search_id
             result["details_url"] = details_url(result["pid"], search_id, result["rank"])
-        return results
+        return info
 
     def get_document(self, pid):
         """All the fields of one product, or None if the pid is unknown."""

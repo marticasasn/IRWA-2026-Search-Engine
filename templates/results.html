@@ -13,10 +13,22 @@
                 <button class="btn btn-primary" type="submit">Search</button>
             </div>
         </div>
+        {% include "_search_options.html" %}
     </form>
 
     Found <strong>{{ found_counter }}</strong> results for <strong>"{{ query }}"</strong>
     <span class="text-muted">(ranking: {{ methods[method] }})</span>
+    {% if results_list %}
+        <div class="small text-muted">
+            Showing {{ results_list | length }}{% if info.hidden %}, {{ info.hidden }} similar items hidden{% endif %}.
+        </div>
+    {% endif %}
+    {% if info.fallback %}
+        <div class="alert alert-info mt-2 mb-0">
+            No exact matches for <strong>"{{ query }}"</strong>, showing related products
+            (containing some of the words).
+        </div>
+    {% endif %}
     <hr>
     {% if rag_response %}
         <div class="mb-4 p-3" style="border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
@@ -27,8 +39,8 @@
     <hr>
     {% if not results_list %}
         <div class="alert alert-warning">
-            No products contain all the words of <strong>"{{ query }}"</strong>.
-            Try fewer or more general words.
+            No products match <strong>"{{ query }}"</strong>.
+            Try other or more general words.
         </div>
     {% else %}
         <ol class="results-list">
@@ -56,6 +68,9 @@
                     <div class="small">
                         {% if item.url %}<a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">View on Flipkart</a> · {% endif %}
                         <span class="text-muted">score {{ '%.4f' | format(item.score) }}</span>
+                        {% if item.similar_hidden %}
+                            · <span class="text-muted">+{{ item.similar_hidden }} similar item{{ 's' if item.similar_hidden > 1 }} hidden</span>
+                        {% endif %}
                     </div>
                 </li>
             {% endfor %}

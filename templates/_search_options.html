@@ -1,0 +1,12 @@
+{# Search switches of the engine; the hidden field tells the server the block was submitted #}
+<details class="search-options mt-2 small text-left">
+    <summary>Search options</summary>
+    <input type="hidden" name="options-form" value="1">
+    {% for name, label in option_labels.items() %}
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="opt-{{ name }}" name="{{ name }}"
+                   {% if options.get(name, True) %}checked{% endif %}>
+            <label class="form-check-label" for="opt-{{ name }}">{{ label }}</label>
+        </div>
+    {% endfor %}
+</details>

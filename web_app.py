@@ -7,7 +7,7 @@ from flask import request
 
 from myapp.analytics.analytics_data import AnalyticsData, ClickedDoc
 from myapp.search.objects import Document, StatsDocument
-from myapp.search.search_engine import SearchEngine
+from myapp.search.search_engine import SEARCH_OPTIONS, SearchEngine, parse_options
 from myapp.generation.rag import RAGGenerator
 from dotenv import load_dotenv
 load_dotenv()  # take environment variables from .env
@@ -62,7 +62,9 @@ def index():
     print("Remote IP: {} - JSON user browser {}".format(user_ip, agent))
     print(session)
     return render_template('index.html', page_title="Welcome", methods=METHOD_LABELS,
-                           selected_method=session.get('last_method', DEFAULT_METHOD))
+                           selected_method=session.get('last_method', DEFAULT_METHOD),
+                           options=session.get('last_options', {name: True for name in SEARCH_OPTIONS}),
+                           option_labels=SEARCH_OPTIONS)
 
 
 @app.route('/search', methods=['POST'])
@@ -75,24 +77,29 @@ def search_form_post():
     if method not in METHOD_LABELS:
         method = DEFAULT_METHOD
 
+    options = parse_options(request.form)
+
     session['last_search_query'] = search_query
     session['last_method'] = method
+    session['last_options'] = options
 
     search_id = analytics_data.save_query_terms(search_query)
 
-    results = search_engine.search(search_query, search_id, method=method)
+    info = search_engine.search(search_query, search_id, method=method, options=options)
+    results = info["results"]
 
     # generate RAG response based on user query and retrieved results
     rag_response = rag_generator.generate_response(search_query, results)
     print("RAG response:", rag_response)
 
-    found_count = len(results)
+    found_count = info["total"]
     session['last_found_count'] = found_count
 
     print(session)
 
     return render_template('results.html', results_list=results, page_title="Results", found_counter=found_count,
-                           rag_response=rag_response, query=search_query, method=method, methods=METHOD_LABELS)
+                           rag_response=rag_response, query=search_query, method=method, methods=METHOD_LABELS,
+                           info=info, options=options, option_labels=SEARCH_OPTIONS)
 
 
 @app.route('/doc_details', methods=['GET'])
