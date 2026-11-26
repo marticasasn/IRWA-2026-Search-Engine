@@ -40,11 +40,10 @@ class SearchEngine:
         """Ranked search; returns the info dict of src.engine.SearchEngine.search_with_info
         (results, total, fallback, hidden, query_terms). Every result dict also gets search_id and the
         details_url to our page. options are the search switches (see SEARCH_OPTIONS)."""
-        print("Search query:", search_query, "| method:", method, "| options:", options)
         start = time.perf_counter()
         info = self.engine.search_with_info(search_query, method=method, top_k=top_k, **(options or {}))
         info["time_ms"] = (time.perf_counter() - start) * 1000
-        print(f"Search took {info['time_ms']:.1f} ms, {len(info['results'])} shown of {info['total']}")
+        print(f"Search {search_query!r} ({method}): {info['total']} results, {info['time_ms']:.1f} ms")
 
         for result in info["results"]:
             result["search_id"] = search_id

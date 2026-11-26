@@ -5,11 +5,10 @@ import sys
 import time
 from json import JSONEncoder
 
-import httpagentparser  # for getting the user agent as json
 from flask import Flask, abort, g, jsonify, redirect, render_template, send_from_directory, session, url_for
 from flask import request
 
-from myapp.analytics.analytics_data import AnalyticsData, ClickedDoc
+from myapp.analytics.analytics_data import AnalyticsData
 from myapp.analytics.dashboard import build_charts, compute_kpis
 from myapp.search.objects import Document, StatsDocument
 from myapp.search.search_engine import SEARCH_OPTIONS, SearchEngine, parse_options
@@ -104,20 +103,7 @@ def log_request(response):
 # Home URL "/"
 @app.route('/')
 def index():
-    print("starting home url /...")
-
-    # flask server creates a session by persisting a cookie in the user's browser.
-    # the 'session' object keeps data between multiple requests. Example:
-    session['some_var'] = "Some value that is kept in session"
-
-    user_agent = request.headers.get('User-Agent')
-    print("Raw user browser:", user_agent)
-
-    user_ip = request.remote_addr
-    agent = httpagentparser.detect(user_agent)
-
-    print("Remote IP: {} - JSON user browser {}".format(user_ip, agent))
-    print(session)
+    """Home page: search box with the last method and search options of the session."""
     return render_template('index.html', page_title="Welcome", methods=METHOD_LABELS,
                            selected_method=session.get('last_method', DEFAULT_METHOD),
                            options=session.get('last_options', {name: True for name in SEARCH_OPTIONS}),
@@ -153,8 +139,6 @@ def search_form_post():
                                 info["query_terms"], options)
     analytics_data.flush()  # queries, clicks and dwell times are written at once
 
-    print(session)
-
     return render_template('results.html', results_list=results, page_title="Results", found_counter=found_count,
                            query=search_query, method=method, methods=METHOD_LABELS, info=info, options=options,
                            option_labels=SEARCH_OPTIONS, search_id=search_id,
@@ -182,7 +166,6 @@ def rag_summary():
     else:
         answer = {"text": rag_generators[mode].generate_response(last["query"], info["results"]), "status": "baseline"}
     answer["mode"] = mode
-    print("RAG response ({}): {}".format(mode, answer["text"]))
     return jsonify(answer)
 
 
@@ -191,20 +174,10 @@ def doc_details():
     """
     Show the details page of one product. The url keeps pid, search_id and rank for the click analytics.
     """
-
-    # getting request parameters:
-    # user = request.args.get('user')
-    print("doc details session: ")
-    print(session)
-
-    res = session.get("some_var")
-    print("recovered var from session:", res)
-
     # get the query string parameters from request
     clicked_doc_id = request.args.get("pid", "")
     search_id = request.args.get("search_id")
     rank = request.args.get("rank")
-    print("click in id={} (search_id={}, rank={})".format(clicked_doc_id, search_id, rank))
 
     doc = search_engine.get_document(clicked_doc_id)
     if doc is None:
@@ -217,7 +190,6 @@ def doc_details():
         click_id = analytics_data.record_click(search_id, g.session_id, clicked_doc_id, rank)
         analytics_data.flush()
 
-    print("fact_clicks count for id={} is {}".format(clicked_doc_id, analytics_data.fact_clicks.get(clicked_doc_id, 0)))
     return render_template('doc_details.html', page_title="Product details", doc=doc, search_id=search_id, rank=rank,
                            query=session.get('last_search_query'), click_id=click_id)
 
