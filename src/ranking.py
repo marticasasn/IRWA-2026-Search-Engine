@@ -7,9 +7,12 @@ from src.indexing import compute_mean_rating, conjunctive_search
 from src.preprocessing import build_terms
 
 
-def rank_tfidf(query, pids, index, idf, doc_norms):
-    """Ranks the given pids by cosine similarity of tf-idf vectors; returns [(pid, score)]."""
-    query_tf = Counter(t for t in build_terms(query) if t in index)
+def rank_tfidf(query, pids, index, idf, doc_norms, analyzer=build_terms):
+    """Ranks the given pids by cosine similarity of tf-idf vectors; returns [(pid, score)].
+
+    analyzer turns the query into terms; it must be the one used to build the index.
+    """
+    query_tf = Counter(t for t in analyzer(query) if t in index)
     query_vec = {t: tf * idf[t] for t, tf in query_tf.items()}
     query_norm = math.sqrt(sum(w ** 2 for w in query_vec.values()))
 
@@ -22,10 +25,13 @@ def rank_tfidf(query, pids, index, idf, doc_norms):
     return sorted(scores, key=lambda x: (-x[1], x[0]))
 
 
-def rank_bm25(query, pids, index, idf_bm25, doc_lens, avg_len, k1=1.2, b=0.75):
-    """Ranks the given pids by BM25 score; returns [(pid, score)]."""
+def rank_bm25(query, pids, index, idf_bm25, doc_lens, avg_len, k1=1.2, b=0.75, analyzer=build_terms):
+    """Ranks the given pids by BM25 score; returns [(pid, score)].
+
+    analyzer turns the query into terms; it must be the one used to build the index.
+    """
     # Sorted so the sum always runs in the same order and the scores are reproducible
-    terms = sorted(set(t for t in build_terms(query) if t in index))
+    terms = sorted(set(t for t in analyzer(query) if t in index))
 
     scores = []
     for pid in pids:
@@ -61,13 +67,14 @@ def quality_factor(rating, discount, neutral_rating, weights=None):
 
 
 def rank_custom(query, pids, index, idf_bm25, doc_lens, avg_len, product_info, weights=None,
-                k1=1.2, b=0.75, mean_rating=None):
+                k1=1.2, b=0.75, mean_rating=None, analyzer=build_terms):
     """BM25 score min-max normalised over the results times the quality factor; returns [(pid, score)].
 
     Out of stock products always go after all the in-stock ones, ordered by score among themselves.
     mean_rating is the neutral rating of unrated products; computed from product_info if not given.
+    analyzer turns the query into terms; it must be the one used to build the index.
     """
-    bm25 = rank_bm25(query, pids, index, idf_bm25, doc_lens, avg_len, k1, b)
+    bm25 = rank_bm25(query, pids, index, idf_bm25, doc_lens, avg_len, k1, b, analyzer=analyzer)
     if not bm25:
         return []
     if mean_rating is None:

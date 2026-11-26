@@ -85,9 +85,12 @@ def build_search_data(corpus, field="all_terms"):
     }
 
 
-def conjunctive_search(query, index):
-    """AND search: returns the set of pids that contain all the query terms."""
-    terms = set(build_terms(query))
+def conjunctive_search(query, index, analyzer=build_terms):
+    """AND search: returns the set of pids that contain all the query terms.
+
+    analyzer turns the query into terms; it must be the one used to build the index.
+    """
+    terms = set(analyzer(query))
     if not terms or any(t not in index for t in terms):
         return set()
     # Start with the shortest posting list so the intersection is fast
