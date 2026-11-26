@@ -16,7 +16,7 @@ List of what was implemented and where. Paths are relative to the repository roo
     `/dashboard` get products from `SearchEngine.get_document`.
 - Routes: `/` (search box, method select, search options), `/search` (POST), `/doc_details` (GET `pid`,
   `search_id`, `rank`), `/rag_summary` (GET `search_id`, `mode`), `/dwell` (POST beacon), `/stats`, `/dashboard`,
-  `/plot_number_of_views` (template).
+  `/plot_number_of_views` (template), `/favicon.ico` (`static/favicon.ico`, cropped from the template's UPF logo).
 - Pages: `templates/index.html`, `templates/results.html`, `templates/doc_details.html`,
   `templates/_search_options.html`, `templates/dashboard.html`; styles in `static/styles/custom.css`.
 
@@ -102,8 +102,14 @@ List of what was implemented and where. Paths are relative to the repository roo
 ## Web analytics (`myapp/analytics/`)
 
 - `AnalyticsData(path=None, clock=None)` in `analytics_data.py`; file `data/analytics.json` (gitignored), path
-  overridable with `ANALYTICS_FILE`. Saved atomically at most every `SAVE_INTERVAL_SECONDS` (5) and at exit
-  (`atexit`); `load()`, `save(force)`, `reset()`.
+  overridable with `ANALYTICS_FILE`; `load()`, `save(force)`, `flush()`, `reset()`. Writes are atomic
+  (temporary file + rename):
+  - after every query, click and dwell event (`flush()` in `web_app.py`);
+  - request rows: at most every `SAVE_INTERVAL_SECONDS` (5);
+  - at exit: `atexit` -> `flush()` (Ctrl+C; SIGTERM and SIGBREAK are turned into a normal exit). `flush()` only
+    writes if the process has unsaved changes, so the Flask reloader's watcher process never overwrites the file.
+  - Tested with a real console Ctrl+C on `python web_app.py` (DEBUG=True) right after 2 searches and 1 click:
+    exit code 0, all events and the last request row in the file.
 - Star schema:
 
 | Table | Fields |

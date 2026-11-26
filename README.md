@@ -444,8 +444,9 @@ with the old ones and the rows already in the file are kept.
 ### Web analytics
 
 - Every request, session, query and click is stored in memory and saved to **`data/analytics.json`**
-  (gitignored; at most every 5 seconds and when the app stops). Tables: `dim_session`, `fact_request`,
-  `fact_query`, `fact_click` (see `myapp/analytics/analytics_data.py`).
+  (gitignored). Queries, clicks and dwell times are written immediately; request rows at most every 5 seconds and
+  when the app stops (Ctrl+C included). Tables: `dim_session`, `fact_request`, `fact_query`, `fact_click`
+  (see `myapp/analytics/analytics_data.py`).
 - A new session starts after 30 minutes without requests. Dwell time on a product page is sent by the page when it
   is left (`navigator.sendBeacon` to `/dwell`); if it does not arrive, the time until the next request is used.
 - **Dashboard**: http://localhost:8088/dashboard (KPIs and charts). `/stats` is the template's click list.
