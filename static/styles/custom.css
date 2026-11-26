@@ -73,3 +73,11 @@ input[type=submit]:hover {
 .img-thumbnail {
     max-height: 128px;
 }
+
+.rag-mode {
+    max-width: 130px;
+}
+
+.rag-text {
+    white-space: pre-line;
+}

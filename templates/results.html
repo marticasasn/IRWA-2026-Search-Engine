@@ -30,12 +30,41 @@
         </div>
     {% endif %}
     <hr>
-    {% if rag_response %}
-        <div class="mb-4 p-3" style="border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
-            <h5>AI-Generated Summary:</h5>
-            <p>{{ rag_response }}</p>
+    <div id="rag-box" class="mb-4 p-3" style="border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="mb-0">AI-Generated Summary:</h5>
+            <select id="rag-mode" class="custom-select custom-select-sm rag-mode" aria-label="RAG version">
+                {% for mode in rag_modes %}
+                    <option value="{{ mode }}" {% if mode == rag_mode %}selected{% endif %}>{{ mode | capitalize }}</option>
+                {% endfor %}
+            </select>
         </div>
-    {% endif %}
+        <p id="rag-text" class="rag-text mb-1">Generating summary...</p>
+        <div id="rag-meta" class="small text-muted"></div>
+    </div>
+    <script>
+        // Loads the summary of this search; the text is inserted as plain text, never as HTML
+        function loadSummary(mode) {
+            var text = document.getElementById("rag-text");
+            var meta = document.getElementById("rag-meta");
+            text.textContent = "Generating summary...";
+            meta.textContent = "";
+            fetch("/rag_summary?search_id={{ search_id }}&mode=" + encodeURIComponent(mode))
+                .then(function (r) { if (!r.ok) { throw new Error(r.status); } return r.json(); })
+                .then(function (a) {
+                    text.textContent = a.text;
+                    var parts = [a.mode];
+                    if (a.status && a.status !== "baseline") { parts.push("status: " + a.status); }
+                    if (a.products && a.products.length) { parts.push(a.products.length + " products given to the model"); }
+                    if (a.cited && a.cited.length) { parts.push("cited: " + a.cited.join(", ")); }
+                    meta.textContent = parts.join(" · ");
+                })
+                .catch(function () { text.textContent = "The summary could not be loaded."; });
+        }
+        var modeSelect = document.getElementById("rag-mode");
+        modeSelect.addEventListener("change", function () { loadSummary(modeSelect.value); });
+        loadSummary(modeSelect.value);
+    </script>
     <hr>
     {% if not results_list %}
         <div class="alert alert-warning">

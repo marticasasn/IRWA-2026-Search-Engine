@@ -1,16 +1,24 @@
 import os
+import sys
 from json import JSONEncoder
 
 import httpagentparser  # for getting the user agent as json
-from flask import Flask, abort, redirect, render_template, session, url_for
+from flask import Flask, abort, jsonify, redirect, render_template, session, url_for
 from flask import request
 
 from myapp.analytics.analytics_data import AnalyticsData, ClickedDoc
 from myapp.search.objects import Document, StatsDocument
 from myapp.search.search_engine import SEARCH_OPTIONS, SearchEngine, parse_options
 from myapp.generation.rag import RAGGenerator
+from myapp.generation.rag_improved import ImprovedRAGGenerator
 from dotenv import load_dotenv
 load_dotenv()  # take environment variables from .env
+
+# Product titles and LLM answers contain non-ASCII characters; never let a print fail a request
+# on consoles with a limited encoding (e.g. cp1252 on Windows)
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(errors="replace")
 
 
 # *** for using method to_json in objects ***
@@ -32,8 +40,9 @@ app.config["SESSION_COOKIE_NAME"] = os.getenv("SESSION_COOKIE_NAME", "session")
 search_engine = SearchEngine(raw_path=os.getenv("DATA_FILE_PATH", "fashion_products_dataset.json"))
 # instantiate our in memory persistence
 analytics_data = AnalyticsData()
-# instantiate RAG generator
-rag_generator = RAGGenerator()
+# instantiate the RAG generators: the template's one (baseline) and ours (improved)
+rag_generators = {"improved": ImprovedRAGGenerator(), "baseline": RAGGenerator()}
+DEFAULT_RAG = "improved"
 
 DEFAULT_METHOD = "custom"
 METHOD_LABELS = {"custom": "Custom (BM25 + rating + discount)", "bm25": "BM25", "tfidf": "TF-IDF cosine"}
@@ -87,10 +96,8 @@ def search_form_post():
 
     info = search_engine.search(search_query, search_id, method=method, options=options)
     results = info["results"]
-
-    # generate RAG response based on user query and retrieved results
-    rag_response = rag_generator.generate_response(search_query, results)
-    print("RAG response:", rag_response)
+    # The RAG summary is loaded by the results page from /rag_summary, so the results show at once
+    session['last_search'] = {"search_id": search_id, "query": search_query, "method": method, "options": options}
 
     found_count = info["total"]
     session['last_found_count'] = found_count
@@ -98,8 +105,34 @@ def search_form_post():
     print(session)
 
     return render_template('results.html', results_list=results, page_title="Results", found_counter=found_count,
-                           rag_response=rag_response, query=search_query, method=method, methods=METHOD_LABELS,
-                           info=info, options=options, option_labels=SEARCH_OPTIONS)
+                           query=search_query, method=method, methods=METHOD_LABELS, info=info, options=options,
+                           option_labels=SEARCH_OPTIONS, search_id=search_id,
+                           rag_mode=session.get('rag_mode', DEFAULT_RAG), rag_modes=list(rag_generators))
+
+
+@app.route('/rag_summary', methods=['GET'])
+def rag_summary():
+    """AI summary of the last search of this session, as JSON (mode = "improved" or "baseline").
+
+    The search is run again with the same parameters (it is deterministic and fast) instead of keeping
+    the results in the session cookie; it is not counted as a new query.
+    """
+    last = session.get('last_search')
+    if not last or str(last["search_id"]) != request.args.get("search_id", ""):
+        abort(404)
+    mode = request.args.get("mode", DEFAULT_RAG)
+    if mode not in rag_generators:
+        mode = DEFAULT_RAG
+    session['rag_mode'] = mode
+
+    info = search_engine.engine.search_with_info(last["query"], method=last["method"], **last["options"])
+    if mode == "improved":
+        answer = rag_generators[mode].generate_response(last["query"], info["results"], fallback=info["fallback"])
+    else:
+        answer = {"text": rag_generators[mode].generate_response(last["query"], info["results"]), "status": "baseline"}
+    answer["mode"] = mode
+    print("RAG response ({}): {}".format(mode, answer["text"]))
+    return jsonify(answer)
 
 
 @app.route('/doc_details', methods=['GET'])
