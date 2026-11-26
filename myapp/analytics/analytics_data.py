@@ -110,6 +110,13 @@ class AnalyticsData:
         self._last_save = time.time()
         self._dirty = False
 
+    def flush(self):
+        """Saves now if there are unsaved changes (used after every query, click and dwell event and at
+        exit). A process that never changed the tables, like the Flask reloader's watcher process,
+        never writes, so it cannot overwrite the file with an old copy."""
+        if self._dirty:
+            self.save(force=True)
+
     def reset(self):
         """Empties every table (the file is overwritten on the next save)."""
         self.dim_session, self.fact_request, self.fact_query, self.fact_click, self.fact_clicks = {}, [], {}, {}, {}

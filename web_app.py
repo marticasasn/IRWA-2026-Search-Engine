@@ -1,5 +1,6 @@
 import atexit
 import os
+import signal
 import sys
 import time
 from json import JSONEncoder
@@ -46,7 +47,19 @@ search_engine = SearchEngine(raw_path=os.getenv("DATA_FILE_PATH", "fashion_produ
 ANALYTICS_FILE = os.getenv("ANALYTICS_FILE", os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                                           "data", "analytics.json"))
 analytics_data = AnalyticsData(path=ANALYTICS_FILE)
-atexit.register(analytics_data.save)
+# Unsaved analytics are written when the app stops (Ctrl+C raises KeyboardInterrupt and exits normally);
+# SIGTERM and Ctrl+Break (Windows) are turned into a normal exit so the atexit save runs too
+atexit.register(analytics_data.flush)
+
+
+def _exit_on_signal(signum, frame):
+    """Normal exit on a termination signal, so the atexit handlers run."""
+    sys.exit(0)
+
+
+for _name in ("SIGTERM", "SIGBREAK"):
+    if hasattr(signal, _name):
+        signal.signal(getattr(signal, _name), _exit_on_signal)
 print("Analytics data file:", ANALYTICS_FILE)
 # instantiate the RAG generators: the template's one (baseline) and ours (improved)
 rag_generators = {"improved": ImprovedRAGGenerator(), "baseline": RAGGenerator()}
@@ -138,6 +151,7 @@ def search_form_post():
     session['last_found_count'] = found_count
     analytics_data.record_query(search_id, g.session_id, search_query, method, found_count, info["fallback"],
                                 info["query_terms"], options)
+    analytics_data.flush()  # queries, clicks and dwell times are written at once
 
     print(session)
 
@@ -201,6 +215,7 @@ def doc_details():
     click_id = None
     if search_id:
         click_id = analytics_data.record_click(search_id, g.session_id, clicked_doc_id, rank)
+        analytics_data.flush()
 
     print("fact_clicks count for id={} is {}".format(clicked_doc_id, analytics_data.fact_clicks.get(clicked_doc_id, 0)))
     return render_template('doc_details.html', page_title="Product details", doc=doc, search_id=search_id, rank=rank,
@@ -215,6 +230,7 @@ def dwell():
                                                     float(request.form.get("dwell_ms", "")))
     except ValueError:
         stored = False
+    analytics_data.flush()
     return ("", 204) if stored else ("", 400)
 
 
