@@ -2,30 +2,42 @@
 {% block page_title %}{{ page_title }}{% endblock %}
 
 {% block header %}
-    <!-- Next tag loads Charts.js https://www.chartjs.org/docs/latest/ -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.2/chart.min.js"
-            integrity="sha512-tMabqarPtykgDtdtSqCL3uLVM0gS1ZkUAVhRFu1vSEFgvB73niFQWJuvviDyBGBH22Lcau4rHB5p2K2T0Xvr6Q=="
-            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    {# Vega-Lite runtime for the Altair charts (versions matching the Altair 6 schema) #}
+    <script src="https://cdn.jsdelivr.net/npm/vega@6.2.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@6.4.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@7.1.0"></script>
 {% endblock %}
 
 {% block content %}
-
-    <!--
-    Examples of what to show in Dashboard:
-
-    - Ranking of visited documents (from results page)
-    - Visitor's preferred browsers
-    - Visitor's city (from IP)
-    - preferred queries ranking
-    - preferred terms
-    - etc.
-
-    -->
-
+    <div class="mb-3 small">
+        <a href="/">Home</a> · <a href="/stats">Stats</a>
+    </div>
     <h3>Dashboard</h3>
-    <iframe src="/plot_number_of_views" width="600" height="400" style="border: none;"></iframe>
+    <p class="small text-muted text-break">Data file: {{ data_file }}</p>
 
+    <div class="row kpis">
+        {% for name, value in kpis.items() %}
+            <div class="col-6 col-md-3 mb-3">
+                <div class="kpi p-2">
+                    <div class="kpi-value">{{ value if value is not none else "–" }}</div>
+                    <div class="kpi-name small text-muted">{{ name }}</div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 
+    {% for chart in charts %}
+        <div class="dashboard-chart mb-4">
+            <h5>{{ chart.title }}</h5>
+            {% if chart.spec %}
+                <div id="chart-{{ loop.index }}"></div>
+                <script>
+                    vegaEmbed("#chart-{{ loop.index }}", {{ chart.spec | safe }}, {actions: false});
+                </script>
+            {% else %}
+                <div class="text-muted small">No data yet.</div>
+            {% endif %}
+            <div class="small text-muted">{{ chart.caption }}</div>
+        </div>
+    {% endfor %}
 {% endblock %}
-
-

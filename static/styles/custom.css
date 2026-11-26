@@ -81,3 +81,21 @@ input[type=submit]:hover {
 .rag-text {
     white-space: pre-line;
 }
+
+/* Part 4: dashboard */
+.kpi {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    text-align: center;
+    height: 100%;
+}
+
+.kpi-value {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #c8102e;
+}
+
+.dashboard-chart {
+    overflow-x: auto;
+}
