@@ -37,15 +37,19 @@ class RAGGenerator:
             dict: Contains the generated suggestion and the quality evaluation.
         """
         DEFAULT_ANSWER = "RAG is not available. Check your credentials (.env file) or account limits."
+        api_key = os.environ.get("GROQ_API_KEY", "").strip()
+        if not api_key or api_key.startswith("<"):
+            # No key configured (see .env.example): skip the network call
+            return DEFAULT_ANSWER
         try:
             client = Groq(
-                api_key=os.environ.get("GROQ_API_KEY"),
+                api_key=api_key,
             )
             model_name = os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant")
 
             # Format the retrieved results for the prompt
             formatted_results = "\n".join(
-                [f"- PID: {res.pid}, Title: {res.title}" for res in retrieved_results[:top_N]]
+                [f"- PID: {res['pid']}, Title: {res['title']}" for res in retrieved_results[:top_N]]
             )
 
             prompt = self.PROMPT_TEMPLATE.format(
