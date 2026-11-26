@@ -73,7 +73,11 @@ def build_search_data(corpus, field="all_terms"):
     idf = compute_idf(index, len(corpus))
     doc_lens = compute_doc_lengths(corpus, field)
     product_info = get_product_info(corpus)
+    # Title terms (pid -> terms) for the title coverage of the "custom_title" ranking
+    title_terms = (dict(zip(corpus["pid"], map(frozenset, corpus["title_terms"])))
+                   if "title_terms" in corpus else {})
     return {
+        "title_terms": title_terms,
         "index": index,
         "idf": idf,
         "doc_norms": compute_doc_norms(index, idf),
