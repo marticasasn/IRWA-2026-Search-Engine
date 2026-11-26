@@ -6,7 +6,7 @@ import time
 from json import JSONEncoder
 
 import httpagentparser  # for getting the user agent as json
-from flask import Flask, abort, g, jsonify, redirect, render_template, session, url_for
+from flask import Flask, abort, g, jsonify, redirect, render_template, send_from_directory, session, url_for
 from flask import request
 
 from myapp.analytics.analytics_data import AnalyticsData, ClickedDoc
@@ -220,6 +220,12 @@ def doc_details():
     print("fact_clicks count for id={} is {}".format(clicked_doc_id, analytics_data.fact_clicks.get(clicked_doc_id, 0)))
     return render_template('doc_details.html', page_title="Product details", doc=doc, search_id=search_id, rank=rank,
                            query=session.get('last_search_query'), click_id=click_id)
+
+
+@app.route('/favicon.ico')
+def favicon():
+    """Site icon (UPF logo mark) for browsers that request /favicon.ico directly."""
+    return send_from_directory(app.static_folder, "favicon.ico", mimetype="image/vnd.microsoft.icon")
 
 
 @app.route('/dwell', methods=['POST'])
