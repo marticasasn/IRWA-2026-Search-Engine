@@ -2,11 +2,10 @@ import os
 from json import JSONEncoder
 
 import httpagentparser  # for getting the user agent as json
-from flask import Flask, render_template, session
+from flask import Flask, abort, redirect, render_template, session, url_for
 from flask import request
 
 from myapp.analytics.analytics_data import AnalyticsData, ClickedDoc
-from myapp.search.load_corpus import load_corpus
 from myapp.search.objects import Document, StatsDocument
 from myapp.search.search_engine import SearchEngine
 from myapp.generation.rag import RAGGenerator
@@ -27,22 +26,22 @@ app = Flask(__name__)
 
 # random 'secret_key' is used for persisting data in secure cookie
 app.secret_key = os.getenv("SECRET_KEY")
-# open browser dev tool to see the cookies
-app.session_cookie_name = os.getenv("SESSION_COOKIE_NAME")
-# instantiate our search engine
-search_engine = SearchEngine()
+# open browser dev tool to see the cookies (Flask 3 reads the name from the config)
+app.config["SESSION_COOKIE_NAME"] = os.getenv("SESSION_COOKIE_NAME", "session")
+# instantiate our search engine (loads the corpus and the index once, cached in cache/)
+search_engine = SearchEngine(raw_path=os.getenv("DATA_FILE_PATH", "fashion_products_dataset.json"))
 # instantiate our in memory persistence
 analytics_data = AnalyticsData()
 # instantiate RAG generator
 rag_generator = RAGGenerator()
 
-# load documents corpus into memory.
-full_path = os.path.realpath(__file__)
-path, filename = os.path.split(full_path)
-file_path = path + "/" + os.getenv("DATA_FILE_PATH")
-corpus = load_corpus(file_path)
-# Log first element of corpus to verify it loaded correctly:
-print("\nCorpus is loaded... \n First element:\n", list(corpus.values())[0])
+DEFAULT_METHOD = "custom"
+METHOD_LABELS = {"custom": "Custom (BM25 + rating + discount)", "bm25": "BM25", "tfidf": "TF-IDF cosine"}
+
+
+def get_doc_object(pid):
+    """Product as the template's Document object (used by the stats and dashboard pages)."""
+    return Document(**search_engine.get_document(pid))
 
 
 # Home URL "/"
@@ -62,19 +61,26 @@ def index():
 
     print("Remote IP: {} - JSON user browser {}".format(user_ip, agent))
     print(session)
-    return render_template('index.html', page_title="Welcome")
+    return render_template('index.html', page_title="Welcome", methods=METHOD_LABELS,
+                           selected_method=session.get('last_method', DEFAULT_METHOD))
 
 
 @app.route('/search', methods=['POST'])
 def search_form_post():
-    
-    search_query = request.form['search-query']
+    """Runs the query with the selected ranking method and shows the results page."""
+    search_query = request.form.get('search-query', '').strip()
+    if not search_query:
+        return redirect(url_for('index'))
+    method = request.form.get('method', DEFAULT_METHOD)
+    if method not in METHOD_LABELS:
+        method = DEFAULT_METHOD
 
     session['last_search_query'] = search_query
+    session['last_method'] = method
 
     search_id = analytics_data.save_query_terms(search_query)
 
-    results = search_engine.search(search_query, search_id, corpus)
+    results = search_engine.search(search_query, search_id, method=method)
 
     # generate RAG response based on user query and retrieved results
     rag_response = rag_generator.generate_response(search_query, results)
@@ -85,14 +91,14 @@ def search_form_post():
 
     print(session)
 
-    return render_template('results.html', results_list=results, page_title="Results", found_counter=found_count, rag_response=rag_response)
+    return render_template('results.html', results_list=results, page_title="Results", found_counter=found_count,
+                           rag_response=rag_response, query=search_query, method=method, methods=METHOD_LABELS)
 
 
 @app.route('/doc_details', methods=['GET'])
 def doc_details():
     """
-    Show document details page
-    ### Replace with your custom logic ###
+    Show the details page of one product. The url keeps pid, search_id and rank for the click analytics.
     """
 
     # getting request parameters:
@@ -100,12 +106,18 @@ def doc_details():
     print("doc details session: ")
     print(session)
 
-    res = session["some_var"]
+    res = session.get("some_var")
     print("recovered var from session:", res)
 
     # get the query string parameters from request
-    clicked_doc_id = request.args["pid"]
-    print("click in id={}".format(clicked_doc_id))
+    clicked_doc_id = request.args.get("pid", "")
+    search_id = request.args.get("search_id")
+    rank = request.args.get("rank")
+    print("click in id={} (search_id={}, rank={})".format(clicked_doc_id, search_id, rank))
+
+    doc = search_engine.get_document(clicked_doc_id)
+    if doc is None:
+        abort(404)
 
     # store data in statistics table 1
     if clicked_doc_id in analytics_data.fact_clicks.keys():
@@ -115,7 +127,8 @@ def doc_details():
 
     print("fact_clicks count for id={} is {}".format(clicked_doc_id, analytics_data.fact_clicks[clicked_doc_id]))
     print(analytics_data.fact_clicks)
-    return render_template('doc_details.html')
+    return render_template('doc_details.html', page_title="Product details", doc=doc, search_id=search_id, rank=rank,
+                           query=session.get('last_search_query'))
 
 
 @app.route('/stats', methods=['GET'])
@@ -127,7 +140,7 @@ def stats():
 
     docs = []
     for doc_id in analytics_data.fact_clicks:
-        row: Document = corpus[doc_id]
+        row: Document = get_doc_object(doc_id)
         count = analytics_data.fact_clicks[doc_id]
         doc = StatsDocument(pid=row.pid, title=row.title, description=row.description, url=row.url, count=count)
         docs.append(doc)
@@ -141,7 +154,7 @@ def stats():
 def dashboard():
     visited_docs = []
     for doc_id in analytics_data.fact_clicks.keys():
-        d: Document = corpus[doc_id]
+        d: Document = get_doc_object(doc_id)
         doc = ClickedDoc(doc_id, d.description, analytics_data.fact_clicks[doc_id])
         visited_docs.append(doc)
 
@@ -159,4 +172,6 @@ def plot_number_of_views():
 
 
 if __name__ == "__main__":
-    app.run(port=8088, host="0.0.0.0", threaded=False, debug=os.getenv("DEBUG"))
+    # os.getenv returns a string, so "False" must not count as true
+    debug = os.getenv("DEBUG", "False").strip().lower() in ("1", "true", "yes")
+    app.run(port=8088, host="0.0.0.0", threaded=False, debug=debug)

@@ -1,36 +1,37 @@
-import random
-import numpy as np
+import time
+from urllib.parse import urlencode
 
-from myapp.search.objects import Document
+from src.engine import METHODS, SearchEngine as CoreSearchEngine
 
 
-def dummy_search(corpus: dict, search_id, num_results=20):
-    """
-    Just a demo method, that returns random <num_results> documents from the corpus
-    :param corpus: the documents corpus
-    :param search_id: the search id
-    :param num_results: number of documents to return
-    :return: a list of random documents from the corpus
-    """
-    res = []
-    doc_ids = list(corpus.keys())
-    docs_to_return = np.random.choice(doc_ids, size=num_results, replace=False)
-    for doc_id in docs_to_return:
-        doc = corpus[doc_id]
-        res.append(Document(pid=doc.pid, title=doc.title, description=doc.description,
-                            url="doc_details?pid={}&search_id={}&param2=2".format(doc.pid, search_id), ranking=random.random()))
-    return res
+def details_url(pid, search_id, rank):
+    """Url of our details page; keeps pid, search_id and rank for the click analytics."""
+    return "/doc_details?" + urlencode({"pid": pid, "search_id": search_id, "rank": rank})
 
 
 class SearchEngine:
-    """Class that implements the search engine logic"""
+    """Class that implements the search engine logic (web layer over src.engine.SearchEngine)"""
 
-    def search(self, search_query, search_id, corpus):
-        print("Search query:", search_query)
+    methods = METHODS
 
-        results = []
-        ### You should implement your search logic here:
-        results = dummy_search(corpus, search_id)  # replace with call to search algorithm
+    def __init__(self, raw_path="fashion_products_dataset.json"):
+        """Loads our engine once; raw_path is the raw dataset used for the display fields."""
+        self.engine = CoreSearchEngine(raw_path=raw_path)
+        source = "cache" if self.engine.from_cache else "corpus (cache rebuilt)"
+        print(f"Search engine ready in {self.engine.startup_time:.2f}s, loaded from {source}")
 
-        # results = search_in_corpus(search_query)
+    def search(self, search_query, search_id, method="custom", top_k=20):
+        """Ranked search; every result dict also gets search_id and the details_url to our page."""
+        print("Search query:", search_query, "| method:", method)
+        start = time.perf_counter()
+        results = self.engine.search(search_query, method=method, top_k=top_k)
+        print(f"Search took {(time.perf_counter() - start) * 1000:.1f} ms, {len(results)} results")
+
+        for result in results:
+            result["search_id"] = search_id
+            result["details_url"] = details_url(result["pid"], search_id, result["rank"])
         return results
+
+    def get_document(self, pid):
+        """All the fields of one product, or None if the pid is unknown."""
+        return self.engine.get_document(pid)
