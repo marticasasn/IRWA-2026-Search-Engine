@@ -30,10 +30,23 @@
         <div class="dashboard-chart mb-4">
             <h5>{{ chart.title }}</h5>
             {% if chart.spec %}
-                <div id="chart-{{ loop.index }}"></div>
+                <div id="chart-{{ loop.index }}" class="chart-box"></div>
                 <script>
                     vegaEmbed("#chart-{{ loop.index }}", {{ chart.spec | safe }}, {actions: false});
                 </script>
+            {% elif chart.specs %}
+                {% set outer = loop.index %}
+                {# mx-0: the row's negative margins would stick out of the section and make it scroll #}
+                <div class="row mx-0">
+                    {% for spec in chart.specs %}
+                        <div class="col-12 col-md-4 mb-2 px-1">
+                            <div id="chart-{{ outer }}-{{ loop.index }}" class="chart-box"></div>
+                            <script>
+                                vegaEmbed("#chart-{{ outer }}-{{ loop.index }}", {{ spec | safe }}, {actions: false});
+                            </script>
+                        </div>
+                    {% endfor %}
+                </div>
             {% else %}
                 <div class="text-muted small">No data yet.</div>
             {% endif %}

@@ -97,5 +97,10 @@ input[type=submit]:hover {
 }
 
 .dashboard-chart {
-    overflow-x: auto;
+    overflow-x: auto;  /* only a fallback for very narrow screens */
+}
+
+/* Charts with width "container" take this width */
+.chart-box {
+    width: 100%;
 }
