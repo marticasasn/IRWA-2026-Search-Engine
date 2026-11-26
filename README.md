@@ -33,6 +33,8 @@ IRWA-2026-Search-Engine/
 ├── web_app.py                              # Flask app
 ├── myapp/, templates/, static/             # course template (search, RAG, analytics, pages)
 ├── src/engine.py                           # SearchEngine used by the web app
+├── scripts/                                # Part 4 scripts (comparisons, evaluation, simulation)
+├── docs/                                   # Part 4 generated tables and technical notes
 └── .env.example                            # settings template (copy to .env)
 ```
 
@@ -347,18 +349,29 @@ Everything for Part 3 is in **`IRWA_Part3_Ranking_Filtering.ipynb`**, which reus
 
 ---
 
-## Part 4: web app
+## Part 4: web app (search, RAG and web analytics)
 
-A Flask web app (based on the course template) on top of our search engine.
+A Flask web app (based on the course template) on top of our search engine, with an AI summary (RAG) of the
+results and web analytics.
 
 ### Files
 
-- `web_app.py`: Flask app (routes `/`, `/search`, `/doc_details`, `/stats`, `/dashboard`).
-- `src/engine.py`: `SearchEngine` class used by the web app. It builds the search data once (`build_search_data`) and
-  caches it in `cache/search_data.pkl` (gitignored), so restarts take less than a second.
-- `myapp/search/search_engine.py`: web layer over `src.engine.SearchEngine` (adds `search_id` and the details url).
-- `templates/`, `static/`: pages (bootstrap).
-- `.env.example`: settings template. The real `.env` is gitignored and must never be committed.
+| File | Content |
+|---|---|
+| `web_app.py` | Flask app: routes `/`, `/search`, `/doc_details`, `/rag_summary`, `/dwell`, `/stats`, `/dashboard` |
+| `src/engine.py` | `SearchEngine` used by the web app (index cache, search options) |
+| `myapp/search/search_engine.py` | web layer over `src.engine.SearchEngine` (search_id, details url, search options of the form) |
+| `myapp/generation/rag.py` | template `RAGGenerator` (baseline) |
+| `myapp/generation/rag_improved.py` | `ImprovedRAGGenerator` |
+| `myapp/analytics/analytics_data.py` | analytics star schema (`AnalyticsData`), saved to a JSON file |
+| `myapp/analytics/dashboard.py` | KPIs and Altair charts of `/dashboard` |
+| `templates/`, `static/` | pages (bootstrap) |
+| `scripts/search_before_after.py` | writes `docs/part4_search_before_after.md` |
+| `scripts/rag_compare.py` | writes `docs/rag_comparison.md` |
+| `scripts/eval_rankings.py` | writes `docs/part4_ranking_metrics.md` and `docs/unlabelled_for_review.csv` |
+| `scripts/simulate_traffic.py` | simulated traffic to test the analytics (separate file) |
+| `docs/part4_technical_notes.md` | list of what was implemented and where |
+| `.env.example` | settings template; the real `.env` is gitignored and must never be committed |
 
 ### Setup
 
@@ -368,9 +381,13 @@ A Flask web app (based on the course template) on top of our search engine.
    cp .env.example .env
    ```
    - `SECRET_KEY`: any long random string (e.g. `python -c "import secrets; print(secrets.token_hex(24))"`).
+   - `DEBUG`: `True` or `False`.
    - `DATA_FILE_PATH`: raw dataset, `fashion_products_dataset.json` (repository root).
-   - `GROQ_API_KEY`: your Groq key (only needed for the AI summary). Leave it empty to run without RAG.
-   - `GROQ_MODEL`: `llama-3.1-8b-instant`.
+   - `GROQ_API_KEY`: your Groq key (create one at https://console.groq.com/keys). Only needed for the AI summary;
+     if it is empty the app works and the summary says that RAG is not available.
+   - `GROQ_MODEL`: a chat model available to your key. If Groq answers `model_not_found` (the template's
+     `llama-3.1-8b-instant` may be retired), pick one from https://console.groq.com/docs/models, e.g. `openai/gpt-oss-20b`.
+   - `ANALYTICS_FILE` (optional): where the analytics are saved, default `data/analytics.json`.
 3. `processed_corpus.json` (Part 1 output) must be in the repository root.
 
 ### How to run
@@ -379,9 +396,65 @@ A Flask web app (based on the course template) on top of our search engine.
 python web_app.py
 ```
 
-Then open **http://localhost:8088**. The first start builds the index and writes `cache/search_data.pkl` (a few
-seconds); it is rebuilt automatically when `processed_corpus.json` or the raw dataset change, or delete `cache/` to
-force it. Choose the ranking method (custom, BM25 or TF-IDF) in the select next to the search box.
+Then open **http://localhost:8088**. The first start builds both indexes and writes `cache/search_data.pkl`
+(gitignored, about 10 seconds); later starts load it in less than a second. The cache is rebuilt automatically when
+`processed_corpus.json` or the raw dataset change; delete `cache/` to force it.
+
+### Ranking method and search options
+
+- **Ranking method**: select next to the search box: `custom` (default), `custom_title` (custom + title coverage),
+  `bm25`, `tfidf`.
+- **Search options** ("Search options" under the search box, all on by default):
+  - protected words: index built without stemming words like *leggings*, *shorts*, *tights*, *dress*
+    (`PROTECTED_TERMS` in `src/preprocessing.py`);
+  - boost title / category matches;
+  - OR fallback when no product contains all the words (the page says "No exact matches");
+  - hide near-duplicates (same brand and title; the page shows how many were hidden).
+- In code: `SearchEngine().search(query, method="custom", top_k=20, protected_words=True, field_boost=True,
+  or_fallback=True, collapse_duplicates=True)`. With all options off it returns exactly `search_ranked` (Part 3).
+
+### AI summary: baseline vs improved
+
+The summary is shown on top of the results and loaded after the page. The select in the summary box switches
+between **Improved** (default, `ImprovedRAGGenerator`) and **Baseline** (template `RAGGenerator`); the choice is
+kept in the session. Each improvement can be switched off in the constructor:
+`ImprovedRAGGenerator(rich_context=True, filter_results=True, handle_no_good=True, strict_prompt=True,
+verify_citations=True, max_products=6, relative_threshold=0.5, ...)`.
+
+To compare both on the 5 test queries and 3 harder ones (needs `GROQ_API_KEY`):
+
+```bash
+python scripts/rag_compare.py
+```
+
+It writes `docs/rag_comparison.md` (query, retrieved products, both answers side by side).
+
+### Ranking evaluation
+
+```bash
+python scripts/eval_rankings.py
+```
+
+Computes P@5, P@10, MAP@10 and nDCG@10 of tfidf, bm25, custom and custom_title on the labelled queries and writes
+`docs/part4_ranking_metrics.md`. Top-10 results without a label are added to `docs/unlabelled_for_review.csv`
+with an empty `label` column: fill it with 1 (relevant) or 0 and run the script again; the new labels are merged
+with the old ones and the rows already in the file are kept.
+
+### Web analytics
+
+- Every request, session, query and click is stored in memory and saved to **`data/analytics.json`**
+  (gitignored; at most every 5 seconds and when the app stops). Tables: `dim_session`, `fact_request`,
+  `fact_query`, `fact_click` (see `myapp/analytics/analytics_data.py`).
+- A new session starts after 30 minutes without requests. Dwell time on a product page is sent by the page when it
+  is left (`navigator.sendBeacon` to `/dwell`); if it does not arrive, the time until the next request is used.
+- **Dashboard**: http://localhost:8088/dashboard (KPIs and charts). `/stats` is the template's click list.
+- **Reset**: stop the app and delete `data/analytics.json`.
+- **Simulated traffic** (only to test the pipeline, never written to the real file):
+  ```bash
+  python scripts/simulate_traffic.py
+  ANALYTICS_FILE=data/analytics_simulated.json python web_app.py    # dashboard of the simulated data
+  ```
+  On Windows PowerShell: `$env:ANALYTICS_FILE="data/analytics_simulated.json"; python web_app.py`.
 
 ## AI usage
 
