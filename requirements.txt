@@ -12,3 +12,11 @@ spacy>=3.8.16
 
 # Part 3
 gensim>=4.4.0
+
+# Part 4 (web app)
+Flask>=3.1.2
+python-dotenv>=1.1.1
+groq>=0.31.1
+altair>=5.5.0
+httpagentparser>=1.9.5
+pydantic>=2.11.7
